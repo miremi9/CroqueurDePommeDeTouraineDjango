@@ -1,0 +1,21 @@
+<header class="site-header">
+    <div class="container">
+        <h1 class="site-title">
+            <a href="{% url 'forum:index' %}">Mon Forum</a>
+        </h1>
+
+        <nav class="site-nav">
+            <ul>
+                {% for section in sections %}
+                    <li>
+                        <a href="{% url 'forum:section_detail' section.slug %}">
+                            {{ section.name }}
+                        </a>
+                    </li>
+                {% empty %}
+                    <li>Aucune section</li>
+                {% endfor %}
+            </ul>
+        </nav>
+    </div>
+</header>
