@@ -6,7 +6,7 @@ app_name = "forum"
 urlpatterns = [
     path(
         "section/<slug:slug>/",
-        views.section_detail,
+        views.SectionDetailView.as_view(),
         name="section_detail"
     ),
     path('', views.main.as_view(), name='index'),

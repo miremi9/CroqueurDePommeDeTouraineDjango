@@ -1,22 +1,40 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
-
-from tools.models import File
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 # Create your models here.
 class User(AbstractUser):
     email = models.EmailField(unique=True)
-    profile_picture = models.ForeignKey(File, on_delete=models.SET_NULL, null=True, blank=True)
+    profile_picture = models.ImageField(upload_to='uploads/',
+                                        null=True,
+                                        blank=True)
     roles = models.ManyToManyField('Role', related_name='users', blank=True)
 
     def __str__(self):
         return self.username
 
+    @property
+    def is_admin(self):
+        # On suppose que Role.ADMIN_NAME est une constante
+        return self.roles.filter(name=Role.ADMIN_NAME).exists()
+
+
+@receiver(post_save, sender=User)
+def add_default_role(sender, instance, created, **kwargs):
+    if created:
+        # Récupère le rôle visiteur (assurez-vous qu'il existe !)
+        visiteur_role, _ = Role.objects.get_or_create(name=Role.VISITEUR_NAME)
+        instance.roles.add(visiteur_role)
+
 
 class Role(models.Model):
     ADMIN_NAME = "Administrateur"
+    MEMBER_NAME = "Membre"
+    MODO_NAME = "Modérateur"
+    VISITEUR_NAME = "Visiteur"
 
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)

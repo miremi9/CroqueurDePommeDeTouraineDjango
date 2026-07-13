@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}
+Accueil
+{% endblock %}
+
+{% block content %}
+<h1>Bienvenue sur le {{section}}</h1>
+
+{% for post in posts %}
+<h1>{{post}}</h1>
+{% empty %}
+<p> Il n'y a pas d'article pour le moment..</p>
+{% endfor %}
+{% endblock %}

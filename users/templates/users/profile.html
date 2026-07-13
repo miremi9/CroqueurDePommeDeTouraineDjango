@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}
+Profil de {{ profile_user.username }}
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card">
+
+        <div class="card-body">
+
+            <h2 class="card-title">
+                Profil de {{ profile_user.username }}
+            </h2>
+
+
+            {% if profile_user.profile_picture %}
+                <img
+                    src="{{ profile_user.profile_picture.url }}"
+                    class="rounded-circle mb-3"
+                    width="120"
+                    height="120"
+                    alt="Photo de profil"
+                >
+            {% endif %}
+
+
+            <p>
+                <strong>Nom d'utilisateur :</strong>
+                {{ profile_user.username }}
+            </p>
+
+            <p>
+                <strong>Email :</strong>
+                {{ profile_user.email }}
+            </p>
+
+
+            <p>
+                <strong>Rôles :</strong>
+            </p>
+
+            <ul>
+                {% for role in profile_user.roles.all %}
+                    <li>
+                        {{ role.name }}
+                    </li>
+                {% empty %}
+                    <li>
+                        Aucun rôle
+                    </li>
+                {% endfor %}
+            </ul>
+
+
+            <div class="mt-3">
+
+                <a href="{% url 'forum:index' %}"
+                   class="btn btn-secondary">
+                    Retour
+                </a>
+
+                <a href="{% url 'users:profile_edit' %}"
+                   class="btn btn-primary">
+                    Modifier
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

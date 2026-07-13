@@ -1,0 +1,39 @@
+{% load static%}
+<header class="site-header">
+    <!-- Titre et Icônes -->
+    <h1 class="site-title">
+        <img src="{% static 'images/apple.png' %}" width="40">
+        <a href="{% url 'forum:index' %}" style="color: white; text-decoration: none;">Croqueurs de pommes de
+            Touraine</a>
+        <img src="{% static 'images/apple.png' %}" width="40">
+    </h1>
+
+    <!-- Navigation Principale (Sections) -->
+    <nav>
+        <ul class="nav-pills">
+            {% for section in sections %}
+            {% if section.parent_section is None %}
+            <li>
+                <a href="{% url 'forum:section_detail' section.slug %}" class="nav-link-pill">
+                    {{ section.name }}
+                </a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </nav>
+
+    <!-- Navigation Auth (droite) -->
+    <div class="auth-nav">
+        {% if user.is_authenticated %}
+        <a href="{% url 'users:profile' %}" class="btn-green">{{ user.username }}</a>
+        <a href="{% url 'users:logout' %}" class="btn-green">Se déconnecter</a>
+        {% if user.is_admin %}
+        <a href="{% url 'administration:sections' %}" class="btn-green">Admin</a>
+        {% endif %}
+        {% else %}
+        <a href="{% url 'users:login' %}" class="btn-green">Se connecter</a>
+        <a href="{% url 'users:register' %}" class="btn-green">S'inscrire</a>
+        {% endif %}
+    </div>
+</header>

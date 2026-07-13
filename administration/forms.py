@@ -1,0 +1,54 @@
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Submit
+from django import forms
+
+from forum.models import Section
+from users.models import Role
+
+
+class SectionForm(forms.ModelForm):
+    class Meta:
+        model = Section
+        fields = ['name', 'description', 'slug', 'can_post', 'can_read', 'parent_section']
+        widgets = {
+            'can_post': forms.CheckboxSelectMultiple(),
+            'can_read': forms.CheckboxSelectMultiple(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = self.instance
+        if instance:
+            self.fields['parent_section'].queryset = Section.objects.filter(
+                parent_section__isnull=True
+            ).exclude(pk=instance.pk)
+        else:
+            # Si c'est une création (pas d'instance), on prend toutes les racines
+            self.fields['parent_section'].queryset = Section.objects.filter(
+                parent_section__isnull=True
+            )
+
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.layout = Layout(
+            'name', 'description', 'slug', 'parent_section',
+            'can_post', 'can_read',
+            Submit('submit', 'Enregistrer', css_class='btn-primary')
+        )
+
+        # Optionnel : si vous voulez forcer un rendu propre des ManyToMany
+        self.fields['can_post'].help_text = "Sélectionnez les rôles autorisés à publier."
+        self.fields['can_read'].help_text = "Sélectionnez les rôles autorisés à lire."
+
+    def clean(self):
+        cleaned_data = super().clean()
+        parent = cleaned_data.get("parent_section")
+        can_read = cleaned_data.get('can_read')
+        if parent and parent.parent_section is not None:
+            raise forms.ValidationError("Une sous-section ne peut pas être parente d'une autre section.")
+        if parent is self.instance:
+            raise forms.ValidationError("Une section ne peut pas etre sa propre sous-section.")
+        if not can_read.filter(name=Role.ADMIN_NAME).exists():
+            raise forms.ValidationError(
+                {"can_read": "Les administrateurs doivent obligatoirement avoir accès en lecture."})
+        return cleaned_data

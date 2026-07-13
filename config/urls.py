@@ -17,10 +17,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
-import forum
-
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('forum.urls')),
-    
+    path('users/', include('users.urls')),
+    path('administration/', include('administration.urls')),
+
 ]

@@ -1,38 +1,41 @@
-from django.http import HttpResponseForbidden
-
+from django.contrib.auth.mixins import UserPassesTestMixin
 # Create your views here.
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.views import View
+from django.views.generic import DetailView, CreateView, UpdateView
 
-from forum.models import Section
+import tools.authorisations
+from forum.models import Section, Article
 
 
-def section_detail(request, slug):
+class ArticleComposer(UserPassesTestMixin, CreateView, UpdateView):
+    model = Article
+    form_class = ArticleForm
+    template_name = 'forum/edit_article.html'
+    success_url = reverse_lazy('forum:sections')
 
-    section = get_object_or_404(
-        Section,
-        slug=slug
-    )
 
-    user_roles = request.user.roles.all()
+class SectionDetailView(UserPassesTestMixin, DetailView):
+    model = Section
+    template_name = "forum/section.html"
+    context_object_name = "section"  # Nom de la variable dans votre template
+    slug_field = 'slug'
+    slug_url_kwarg = 'slug'
 
-    can_read = section.can_read.filter(
-        id__in=user_roles
-    ).exists()
+    def test_func(self):
+        section = self.get_object()
+        return tools.authorisations.can_read(self.request.user, section)
 
-    if not can_read:
-        return HttpResponseForbidden(
-            "Vous n'avez pas accès à cette section"
-        )
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        section = self.object
+        context['posts'] = Article.objects.filter(section_id=section.id)
+        context['can_post'] = tools.authorisations.can_post(self.request.user, section)
 
-    return render(
-        request,
-        "forum/section.html",
-        {
-            "section": section
-        }
-    )
+        return context
+
 
 class main(View):
     def get(self, request):
-        return render(request, "base.html")
+        return render(request, "forum/index.html")

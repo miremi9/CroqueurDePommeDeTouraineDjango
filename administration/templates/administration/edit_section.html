@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<h2>Modifier la section : {{ section.name }}</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Affiche les champs du formulaire avec des classes CSS (optionnel) -->
+    {% crispy form %}
+
+    <button type="submit">Enregistrer les modifications</button>
+    <a href="{% url 'administration:sections' %}">Annuler</a>
+</form>
+{% endblock %}

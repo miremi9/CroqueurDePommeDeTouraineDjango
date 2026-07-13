@@ -1,0 +1,17 @@
+{% load crispy_forms_tags %}
+
+<div class="mb-4">
+    {% crispy search_form %}
+</div>
+
+<ul>
+    {% for item in items %}
+    <li>
+        {{ item }}
+        <a href="{% url url_detail item.pk %}">Gérer</a>
+    </li>
+    {% endfor %}
+</ul>
+{% if url_create %}
+<a href="{% url url_create %}">Créer</a>
+{%endif%}

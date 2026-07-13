@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <h2>Modifier mon profil</h2>
+
+
+    <form method="post"
+          enctype="multipart/form-data">
+
+        {% csrf_token %}
+
+        <h4>Informations</h4>
+
+        {{ profile_form|crispy }}
+
+        <button
+                type="submit"
+                name="profile_submit"
+                class="btn btn-primary">
+            Enregistrer
+        </button>
+
+    </form>
+
+
+    <hr>
+
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <h4>Changer le mot de passe</h4>
+
+        {{ password_form|crispy }}
+
+        <button
+                type="submit"
+                name="password_submit"
+                class="btn btn-warning">
+            Changer le mot de passe
+        </button>
+
+    </form>
+
+
+    <a href="{% url 'users:profile' %}"
+       class="btn btn-secondary mt-3">
+        Retour
+    </a>
+
+
+</div>
+
+{% endblock %}
