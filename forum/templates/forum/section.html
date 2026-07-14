@@ -1,15 +1,137 @@
 {% extends "base.html" %}
-
-{% block title %}
-Accueil
-{% endblock %}
+{% load crispy_forms_tags %}
 
 {% block content %}
-<h1>Bienvenue sur le {{section}}</h1>
 
+<h1>Bienvenue sur {{ section.name }}</h1>
+
+{% if can_post %}
+<button
+        class="btn btn-primary"
+        data-bs-toggle="modal"
+        data-bs-target="#createModal">
+    Créer un article
+</button>
+{% endif %}
+
+<!-- Modal création -->
+<div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <form method="post" action="{% url 'forum:article_create' section.slug %}">
+                {% csrf_token %}
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nouvel article</h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    {% crispy article_form %}
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Publier
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<!-- Liste des articles -->
 {% for post in posts %}
-<h1>{{post}}</h1>
+
+<div class="card mb-3">
+
+    <div class="card-body">
+
+        <h3>{{ post.title }}</h3>
+
+        <p>{{ post.content }}</p>
+
+        {% if user == post.author %}
+
+        <button
+                class="btn btn-outline-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#updateModal{{ post.id }}">
+            Modifier
+        </button>
+
+        <!-- Modal modification -->
+        <div class="modal fade"
+             id="updateModal{{ post.id }}"
+             tabindex="-1"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+
+                    <form method="post"
+                          action="{% url 'forum:article_update' slug=post.section.slug id=post.id %}">
+
+                        {% csrf_token %}
+
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Modifier l'article
+                            </h5>
+
+                            <button type="button"
+                                    class="btn-close"
+                                    data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <div class="modal-body">
+                            {% crispy post.edit_form %}
+                        </div>
+
+                        <div class="modal-footer">
+
+                            <button type="button"
+                                    class="btn btn-secondary"
+                                    data-bs-dismiss="modal">
+                                Annuler
+                            </button>
+
+                            <button type="submit"
+                                    class="btn btn-primary">
+                                Enregistrer
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
 {% empty %}
-<p> Il n'y a pas d'article pour le moment..</p>
+
+<p>Il n'y a pas d'article pour le moment.</p>
+
 {% endfor %}
+
 {% endblock %}

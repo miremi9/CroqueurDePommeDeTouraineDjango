@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 import environ
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
+    'ckeditor',
+    'ckeditor_uploader',
     'main',
     'users',
     'administration',
@@ -133,3 +135,9 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = "users.User"
+# Dossier où seront stockées les images uploadées (dans MEDIA_ROOT)
+CKEDITOR_UPLOAD_PATH = 'uploads/'
+
+# Assurez-vous d'avoir aussi défini vos médias
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
