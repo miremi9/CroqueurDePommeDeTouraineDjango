@@ -137,7 +137,13 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 AUTH_USER_MODEL = "users.User"
 # Dossier où seront stockées les images uploadées (dans MEDIA_ROOT)
 CKEDITOR_UPLOAD_PATH = 'uploads/'
-
+CKEDITOR_CONFIGS = {
+    'default': {
+        'toolbar': 'Full',  # Assurez-vous que c'est 'Full' et non 'Basic'
+        'height': 300,
+        'width': '100%',
+    },
+}
 # Assurez-vous d'avoir aussi défini vos médias
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

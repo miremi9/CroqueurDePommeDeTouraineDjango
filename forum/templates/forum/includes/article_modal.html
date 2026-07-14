@@ -1,0 +1,21 @@
+<div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{{ action_url }}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ title }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% load crispy_forms_tags %}
+                    {% crispy form %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">{{ submit_text }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

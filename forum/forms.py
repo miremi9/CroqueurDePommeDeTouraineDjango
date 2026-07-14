@@ -13,14 +13,8 @@ class ArticleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['title'].widget.attrs.update({
-            'class': 'form-control',
-            'placeholder': 'Titre'
-        })
-
         self.helper = FormHelper()
         self.helper.form_tag = False
-
         self.helper.layout = Layout(
             Field(
                 'title',
