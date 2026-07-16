@@ -33,6 +33,12 @@
                     data-bs-target="#updateModal{{ post.id }}">
                 Modifier
             </button>
+
+            {% include "forum/article/_pin_button.html" with post=post %}
+
+            {% include "forum/article/_main_page_button.html" with post=post %}
+
+
         </div>
         {% endif %}
     </article>

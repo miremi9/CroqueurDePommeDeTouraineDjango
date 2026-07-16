@@ -1,0 +1,16 @@
+<span id="pin-button-{{ post.id }}">
+    <button
+            class="btn btn-outline-secondary btn-sm"
+            hx-post="{% url 'forum:article_toggle_pin' post.id %}"
+            hx-target="#pin-button-{{ post.id }}"
+            hx-swap="outerHTML"
+            title="{% if post.pinned_on_top %}Désépingler{% else %}Épingler{% endif %}">
+
+        {% if post.pinned_on_top %}
+            <i class="bi bi-pin-angle-fill"></i>
+        {% else %}
+            <i class="bi bi-pin-angle"></i>
+        {% endif %}
+
+    </button>
+</span>

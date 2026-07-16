@@ -1,0 +1,15 @@
+<span id="pin-button-on-main-page-{{ post.id }}">
+    <button
+            class="btn btn-outline-secondary btn-sm"
+            hx-post="{% url 'forum:article_toggle_pin_main_page' post.id %}"
+            hx-target="#pin-button-on-main-page-{{ post.id }}"
+            hx-swap="outerHTML"
+
+            title="{% if post.pinned_on_main_page %}Retirer de la page d'accueil{% else %}Rajouter sur la page d'accueil{% endif %}">
+        {% if post.pinned_on_main_page %}
+        <i class="bi bi-star-fill"></i>
+        {% else %}
+        <i class="bi bi-star"></i>
+        {% endif %}
+    </button>
+</span>

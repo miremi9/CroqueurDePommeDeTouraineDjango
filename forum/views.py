@@ -1,9 +1,11 @@
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.db.models import Case, When, Value, IntegerField, QuerySet
+from django.http import HttpResponseForbidden
 # Create your views here.
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.views import View
-from django.views.generic import DetailView, CreateView, UpdateView
+from django.views.generic import DetailView, CreateView, UpdateView, TemplateView
 
 import tools.authorisations
 from forum.forms import ArticleForm
@@ -61,18 +63,90 @@ class SectionDetailView(UserPassesTestMixin, DetailView):
         section = self.get_object()
         return tools.authorisations.can_read(self.request.user, section)
 
+    def get_posts(self, section_id: int) -> QuerySet[Article]:
+        return (Article.objects
+                .filter(section_id=section_id)
+                .annotate(
+            pin_order=Case(
+                When(pinned_on_top=True, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField()
+            )
+        )
+                .order_by("pin_order", "created_at")
+                )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         section = self.object
-        posts = Article.objects.filter(section_id=section.id)
-        context['posts'] = posts
-        for post in posts:
+
+        context['posts'] = self.get_posts(section.pk)
+        for post in context['posts']:
             post.edit_form = ArticleForm(instance=post, prefix=f"article_{post.id}")
         context['can_post'] = tools.authorisations.can_post(self.request.user, section)
         context['article_form'] = ArticleForm()
         return context
 
 
-class main(View):
-    def get(self, request):
-        return render(request, "forum/index.html")
+class MainPage(LoginRequiredMixin, TemplateView):
+    template_name = "forum/section.html"
+
+    def get_posts(self):
+        return (
+            Article.objects
+            .filter(pinned_on_main_page=True)
+            .order_by("-created_at")
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["posts"] = self.get_posts()
+
+        for post in context["posts"]:
+            post.edit_form = ArticleForm(
+                instance=post,
+                prefix=f"article_{post.id}"
+            )
+
+        return context
+
+
+@user_passes_test(tools.authorisations.is_admin)
+def article_toggle_pin(request, id):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+
+    article = get_object_or_404(Article, pk=id)
+
+    if request.user != article.author:
+        return HttpResponseForbidden()
+
+    article.pinned_on_top = not article.pinned_on_top
+    article.save(update_fields=["pinned_on_top"])
+
+    return render(
+        request,
+        "forum/article/_pin_button.html",
+        {"post": article},
+    )
+
+
+@user_passes_test(tools.authorisations.is_admin)
+def article_toggle_pin_main_page(request, id):
+    if request.method != "POST":
+        return HttpResponseForbidden()
+
+    article = get_object_or_404(Article, pk=id)
+
+    if request.user != article.author:
+        return HttpResponseForbidden()
+
+    article.pinned_on_main_page = not article.pinned_on_main_page
+    article.save(update_fields=["pinned_on_main_page"])
+
+    return render(
+        request,
+        "forum/article/_main_page_button.html",
+        {"post": article},
+    )

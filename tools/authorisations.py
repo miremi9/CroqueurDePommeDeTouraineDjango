@@ -1,12 +1,18 @@
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.contrib.auth.models import AnonymousUser
+from django.http import HttpRequest
 
 from forum.models import Section
 from users.models import Role
 
 
 def is_admin(request):
-    return request.user.roles.filter(name=Role.ADMIN_NAME).exists()
+    if isinstance(request, HttpRequest):
+        return request.user.roles.filter(name=Role.ADMIN_NAME).exists()
+    elif isinstance(request, AbstractBaseUser):
+        return request.roles.filter(name=Role.ADMIN_NAME).exists()
+    else:
+        raise ValueError("la valuer n'est pas un request HttpRequest ou un AbstractBaseUser")
 
 
 def can_post(user: AbstractBaseUser | AnonymousUser, section: Section):
