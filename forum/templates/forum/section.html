@@ -1,55 +1,47 @@
 {% extends "base.html" %}
 {% load crispy_forms_tags %}
-
-
 {% load forum_extras %}
+
 {% block content %}
+<main class="section-page">
+    <h1 class="section-page__title">{{ section.name }}</h1>
 
-<h1>Bienvenue sur {{ section.name }}</h1>
+    {% if can_post %}
+    <div class="section-page__actions">
+        <button
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#createModal">
+            Créer un article
+        </button>
+    </div>
+    {% url 'forum:article_create' section.slug as create_url %}
+    {% render_article_modal article_form "createModal" "Nouvel article" create_url "Publier" %}
+    {% endif %}
 
-{% if can_post %}
-<button
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#createModal">
-    Créer un article
-</button>
-{% url 'forum:article_create' section.slug as create_url %}
-{% render_article_modal article_form "createModal" "Nouvel article" create_url "Publier" %}
-{% endif %}
-
-
-<!-- Liste des articles -->
-{% for post in posts %}
-
-<div class="card mb-3">
-    <div class="card-body">
-
-        <h3>{{ post.title }}</h3>
-        {{ post.content|safe }}
+    {% for post in posts %}
+    <article class="section-card">
+        <h2 class="section-card__title">{{ post.title }}</h2>
+        <div class="section-card__body">
+            {{ post.content|safe }}
+        </div>
 
         {% if user == post.author %}
-
-
-        <!-- 2. Bouton cible -->
-        <button class="btn btn-outline-primary btn-sm"
-                data-bs-toggle="modal"
-                data-bs-target="#updateModal{{ post.id }}">
-            Modifier
-        </button>
+        <div class="section-card__footer">
+            <button class="btn btn-outline-primary btn-sm"
+                    data-bs-toggle="modal"
+                    data-bs-target="#updateModal{{ post.id }}">
+                Modifier
+            </button>
+        </div>
         {% endif %}
+    </article>
 
-    </div>
-</div>
+    {% url 'forum:article_update' slug=post.section.slug id=post.id as update_url %}
+    {% render_article_modal post.edit_form "updateModal"|concat:post.id "Modifier l'article" update_url "Enregistrer" %}
 
-{% url 'forum:article_update' slug=post.section.slug id=post.id as update_url %}
-{% render_article_modal post.edit_form "updateModal"|concat:post.id "Modifier l'article" update_url "Enregistrer" %}
-
-
-{% empty %}
-
-<p>Il n'y a pas d'article pour le moment.</p>
-
-{% endfor %}
-
+    {% empty %}
+    <p class="section-empty">Il n'y a pas d'article pour le moment.</p>
+    {% endfor %}
+</main>
 {% endblock %}

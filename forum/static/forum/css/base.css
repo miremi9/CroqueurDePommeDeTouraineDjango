@@ -1,0 +1,51 @@
+:root {
+    --color-text: #1a1a1a;
+    --color-text-muted: #333;
+    --color-green: #6aad3a;
+    --color-green-dark: #5a9430;
+    --color-green-soft: rgba(106, 173, 58, 0.85);
+    --color-white: #ffffff;
+    --color-white-soft: rgba(255, 255, 255, 0.88);
+    --color-nav-bar: rgba(235, 235, 235, 0.55);
+    --radius: 8px;
+    --shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.12);
+    --font: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--color-text);
+    background-color: #c8d5b8;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    line-height: 1.6;
+}
+
+a {
+    color: inherit;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
