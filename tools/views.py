@@ -2,8 +2,11 @@ from typing import Callable, Type
 
 import django_filters
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.files.storage import default_storage
 from django.db import models
+from django.http import JsonResponse
 from django.http.request import HttpRequest
+from django.views.decorators.csrf import csrf_exempt
 from django_filters.views import FilterView
 
 from tools.forms import SearchForm
@@ -56,3 +59,19 @@ def listview_factory(my_model: Type[models.Model],
             return context
 
     return MyListView
+
+
+@csrf_exempt
+def tinymce_upload(request):
+    file = request.FILES["file"]
+
+    path = default_storage.save(
+        f"tinymce/{file.name}",
+        file
+    )
+
+    url = default_storage.url(path)
+
+    return JsonResponse({
+        "location": url
+    })

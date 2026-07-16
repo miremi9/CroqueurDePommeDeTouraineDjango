@@ -1,8 +1,9 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit
+from crispy_forms.layout import Layout, Submit, Field
 from django import forms
 
 from forum.models import Section
+from main.models import SiteBody
 from users.models import Role
 
 
@@ -52,3 +53,37 @@ class SectionForm(forms.ModelForm):
             raise forms.ValidationError(
                 {"can_read": "Les administrateurs doivent obligatoirement avoir accès en lecture."})
         return cleaned_data
+
+
+class SiteBodyForm(forms.ModelForm):
+    class Meta:
+        model = SiteBody
+        fields = [
+            "title",
+            "background_image",
+            "bas_de_page",
+            "logo",
+            "color",
+            "url",
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.helper = FormHelper()
+        self.helper.form_method = "post"
+
+        self.helper.layout = Layout(
+            Field("title"),
+            Field("background_image"),
+            Field("logo"),
+            Field("bas_de_page"),
+            Field("color"),
+            Field("url"),
+
+            Submit(
+                "submit",
+                "Enregistrer",
+                css_class="btn btn-primary"
+            )
+        )

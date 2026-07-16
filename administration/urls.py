@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from .views import SiteBodyUpdateView
 
 app_name = "administration"
 urlpatterns = [
@@ -11,4 +12,6 @@ urlpatterns = [
     path('roles/<int:pk>/', views.SectionEdit.as_view(), name='role_detail'),
     path('users/', views.UserAdminListView.as_view(), name='users'),
     path('users/<int:pk>/', views.SectionEdit.as_view(), name='user_detail'),
+    path("site/", SiteBodyUpdateView.as_view(), name="sitebody_edit"
+         ),
 ]

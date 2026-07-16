@@ -39,8 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
-    'ckeditor',
-    'ckeditor_uploader',
+    'tinymce',
     'main',
     'users',
     'administration',
@@ -136,13 +135,24 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 AUTH_USER_MODEL = "users.User"
 # Dossier où seront stockées les images uploadées (dans MEDIA_ROOT)
-CKEDITOR_UPLOAD_PATH = 'uploads/'
-CKEDITOR_CONFIGS = {
-    'default': {
-        'toolbar': 'Full',  # Assurez-vous que c'est 'Full' et non 'Basic'
-        'height': 300,
-        'width': '100%',
-    },
+TINYMCE_DEFAULT_CONFIG = {
+    "height": 500,
+    "menubar": True,
+    "license_key": "gpl",
+    "plugins": (
+        "advlist autolink lists link image charmap preview "
+        "searchreplace visualblocks code fullscreen "
+        "insertdatetime media table help wordcount"
+    ),
+    "toolbar": (
+        "undo redo | blocks | "
+        "bold italic underline | "
+        "alignleft aligncenter alignright | "
+        "bullist numlist | "
+        "link image table | "
+        "removeformat code fullscreen"
+    ),
+    "images_upload_url": "/tinymce/upload/",
 }
 # Assurez-vous d'avoir aussi défini vos médias
 MEDIA_URL = '/media/'

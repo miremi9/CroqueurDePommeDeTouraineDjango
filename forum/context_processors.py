@@ -1,12 +1,19 @@
+from forum.models import Section
 from main.models import SiteBody
-
-from .models import Section
 
 
 def forum_sections(request):
+    parents = (
+        Section.objects
+        .filter(parent_section__isnull=True)
+        .prefetch_related("section_set")
+    )
+
     return {
-        "sections": Section.objects.all()
+        "sections": parents
     }
+
+
 def site_body(request):
     return {
         "site_body": SiteBody.get_solo()

@@ -1,3 +1,4 @@
+{% load crispy_forms_tags %}
 <div class="modal fade" id="{{ modal_id }}" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -8,7 +9,6 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    {% load crispy_forms_tags %}
                     {% crispy form %}
                 </div>
                 <div class="modal-footer">

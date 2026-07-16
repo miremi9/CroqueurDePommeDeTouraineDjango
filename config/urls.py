@@ -14,14 +14,22 @@ Including another URLconf
     1. Import the includes() function: from django.urls import includes, path
     2. Add a URL to urlpatterns:  path('blog/', includes('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
+
+from tools.views import tinymce_upload
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('forum.urls')),
     path('users/', include('users.urls')),
     path('administration/', include('administration.urls')),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
-
+    path("tinymce/upload/", tinymce_upload, name="tinymce_upload"),
 ]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT,
+    )

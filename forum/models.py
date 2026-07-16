@@ -1,4 +1,3 @@
-from ckeditor_uploader.fields import RichTextUploadingField
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
@@ -39,7 +38,7 @@ def manage_section_roles(sender, instance: Section, created, **kwargs):
 
 class Article(models.Model):
     title = models.CharField(max_length=200)
-    content = RichTextUploadingField()
+    content = models.TextField()
     section = models.ForeignKey(Section, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)

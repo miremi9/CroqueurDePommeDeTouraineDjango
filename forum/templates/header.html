@@ -3,8 +3,7 @@
     <!-- Titre et Icônes -->
     <h1 class="site-title">
         <img src="{% static 'images/apple.png' %}" width="40">
-        <a href="{% url 'forum:index' %}" style="color: white; text-decoration: none;">Croqueurs de pommes de
-            Touraine</a>
+        <a href="{% url 'forum:index' %}" style="color: white; text-decoration: none;">{{site_body.title}}</a>
         <img src="{% static 'images/apple.png' %}" width="40">
     </h1>
 
@@ -12,13 +11,22 @@
     <nav>
         <ul class="nav-pills">
             {% for section in sections %}
-            {% if section.parent_section is None %}
-            <li>
-                <a href="{% url 'forum:section_detail' section.slug %}" class="nav-link-pill">
-                    {{ section.name }}
+            <li class="section-button">
+                <a href="{% url 'forum:section_detail' slug=section.slug %}">
+                    <h4>{{ section.name }}</h4>
                 </a>
+                {% if section.section_set.exists %}
+                <ul>
+                    {% for child in section.section_set.all %}
+                    <li>
+                        <a href="{% url 'forum:section_detail' slug=child.slug %}">
+                            {{ child.name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
             </li>
-            {% endif %}
             {% endfor %}
         </ul>
     </nav>
@@ -29,7 +37,22 @@
         <a href="{% url 'users:profile' %}" class="btn-green">{{ user.username }}</a>
         <a href="{% url 'users:logout' %}" class="btn-green">Se déconnecter</a>
         {% if user.is_admin %}
-        <a href="{% url 'administration:sections' %}" class="btn-green">Admin</a>
+        <li class="admin-buttons">
+            <h4>Administration</h4>
+            <ul>
+                <a href="{% url 'administration:sections' %}" class="btn-green">Sections</a>
+            </ul>
+            <ul>
+                <a href="{% url 'administration:roles' %}" class="btn-green">Roles</a>
+            </ul>
+            <ul>
+                <a href="{% url 'administration:sitebody_edit' %}" class="btn-green">Site</a>
+            </ul>
+            <ul>
+                <a href="{% url 'administration:users' %}" class="btn-green">Utilisateurs</a>
+            </ul>
+
+        </li>
         {% endif %}
         {% else %}
         <a href="{% url 'users:login' %}" class="btn-green">Se connecter</a>

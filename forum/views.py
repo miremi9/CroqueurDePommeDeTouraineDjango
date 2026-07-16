@@ -40,6 +40,15 @@ class ArticleCreateView(ArticleBaseView, CreateView):
 class ArticleUpdateView(ArticleBaseView, UpdateView):
     pk_url_kwarg = "id"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["prefix"] = f"article_{self.object.id}"
+        return kwargs
+
+    def get_success_url(self):
+        # Redirige vers la page de la section du post
+        return reverse('forum:section_detail', kwargs={'slug': self.object.section.slug})
+
 
 class SectionDetailView(UserPassesTestMixin, DetailView):
     model = Section
@@ -58,7 +67,7 @@ class SectionDetailView(UserPassesTestMixin, DetailView):
         posts = Article.objects.filter(section_id=section.id)
         context['posts'] = posts
         for post in posts:
-            post.edit_form = ArticleForm(instance=post)
+            post.edit_form = ArticleForm(instance=post, prefix=f"article_{post.id}")
         context['can_post'] = tools.authorisations.can_post(self.request.user, section)
         context['article_form'] = ArticleForm()
         return context

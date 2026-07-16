@@ -3,8 +3,9 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import UpdateView, CreateView
 
-from administration.forms import SectionForm
+from administration.forms import SectionForm, SiteBodyForm
 from forum.models import Section
+from main.models import SiteBody
 from tools import authorisations
 from tools.authorisations import is_admin
 from tools.views import listview_factory
@@ -39,3 +40,18 @@ class SectionEdit(LoginRequiredMixin, UserPassesTestMixin, CreateView, UpdateVie
             return get_object_or_404(Section, pk=pk)
         # Sinon, on retourne None pour créer un nouvel objet
         return None
+
+
+class SiteBodyUpdateView(UpdateView):
+    model = SiteBody
+    form_class = SiteBodyForm
+    template_name = "administration/edit_sitebody.html"
+
+    def get_object(self, queryset=None):
+        obj, created = SiteBody.objects.get_or_create(
+            pk=1
+        )
+        return obj
+
+    def get_success_url(self):
+        return reverse_lazy("forum:index")

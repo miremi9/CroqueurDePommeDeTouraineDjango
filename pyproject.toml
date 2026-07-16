@@ -7,11 +7,11 @@ requires-python = ">=3.14"
 dependencies = [
     "crispy-bootstrap5>=2026.3",
     "django>=6.0.7",
-    "django-ckeditor>=6.7.3",
     "django-crispy-forms>=2.6",
     "django-environ>=0.14.0",
     "django-filter>=26.1",
     "django-solo>=2.5.1",
+    "django-tinymce>=5.0.0",
     "pillow>=12.3.0",
     "psycopg[binary]>=3.3.4",
     "whitenoise>=6.12.0",
