@@ -1,11 +1,12 @@
-from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect, render
+from django.contrib.auth.forms import AuthenticationForm
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView
 
+from tools.authorisations import can_see_profile
+from tools.views import formview_factory
 from users.forms import RegisterForm, ProfileForm
 from users.models import User
 
@@ -68,57 +69,38 @@ def logout_view(request):
 
 
 @login_required
-def profile_view(request):
-    user = request.user
+def profile_view(request, id=None):
+    if id is None:
+        user = request.user
+    else:
+        user = get_object_or_404(
+            User,
+            pk=id,
+        )
+    if not can_see_profile(request, user):
+        raise PermissionDenied
 
     return render(
         request,
         "users/profile.html",
         {
             "profile_user": user,
-        }
+        },
     )
 
 
-class EditProfileView(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = ProfileForm
-    template_name = "users/profile_edit.html"
+EditProfileView = formview_factory(
+    my_model=User,
+    name_field="username",
+    form=ProfileForm,
+    cancel_url=reverse_lazy("users:profile"),
+    my_success_url=reverse_lazy("users:profile"),
+    can_access_function=lambda request: request.user.is_authenticated
+)
 
-    def get_object(self):
-        return self.request.user
 
-    def get_success_url(self):
-        return reverse_lazy("users:profile")
+def get_user(self):
+    return self.request.user
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["profile_form"] = ProfileForm(
-            instance=self.request.user
-        )
-        context["password_form"] = PasswordChangeForm(
-            user=self.request.user
-        )
 
-        return context
-
-    def post(self, request, *args, **kwargs):
-
-        if "password_submit" in request.POST:
-
-            password_form = PasswordChangeForm(
-                user=request.user,
-                data=request.POST
-            )
-
-            if password_form.is_valid():
-                user = password_form.save()
-
-                update_session_auth_hash(
-                    request,
-                    user
-                )
-
-                return self.redirect_to_success()
-
-        return super().post(request, *args, **kwargs)
+EditProfileView.get_object = get_user

@@ -1,13 +1,14 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Field
+from crispy_forms.layout import Layout, Field
 from django import forms
 
 from forum.models import Section
 from main.models import SiteBody
+from tools.forms import BasicButtonMixin
 from users.models import Role
 
 
-class SectionForm(forms.ModelForm):
+class SectionForm(BasicButtonMixin, forms.ModelForm):
     class Meta:
         model = Section
         fields = ['name', 'description', 'slug', 'can_post', 'can_read', 'parent_section']
@@ -31,10 +32,10 @@ class SectionForm(forms.ModelForm):
 
         self.helper = FormHelper()
         self.helper.form_method = 'post'
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             'name', 'description', 'slug', 'parent_section',
             'can_post', 'can_read',
-            Submit('submit', 'Enregistrer', css_class='btn-primary')
         )
 
         # Optionnel : si vous voulez forcer un rendu propre des ManyToMany
@@ -81,9 +82,28 @@ class SiteBodyForm(forms.ModelForm):
             Field("color"),
             Field("url"),
 
-            Submit(
-                "submit",
-                "Enregistrer",
-                css_class="btn btn-primary"
-            )
+            # Submit(
+            #     "submit",
+            #     "Enregistrer",
+            #     css_class="btn btn-primary"
+            # )
+        )
+
+
+class RoleForm(forms.ModelForm):
+    class Meta:
+        model = Role
+        fields = ['name', 'description']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout(
+            Field("name"),
+            Field("description"),
+            # Submit(
+            #     "submit",
+            #     "Enregistrer",
+            #     css_class="btn btn-primary"
+            # )
         )

@@ -19,13 +19,13 @@ Profil de {{ profile_user.username }}
 
 
             {% if profile_user.profile_picture %}
-                <img
+            <img
                     src="{{ profile_user.profile_picture.url }}"
                     class="rounded-circle mb-3"
                     width="120"
                     height="120"
                     alt="Photo de profil"
-                >
+            >
             {% endif %}
 
 
@@ -46,13 +46,13 @@ Profil de {{ profile_user.username }}
 
             <ul>
                 {% for role in profile_user.roles.all %}
-                    <li>
-                        {{ role.name }}
-                    </li>
+                <li>
+                    {{ role.name }}
+                </li>
                 {% empty %}
-                    <li>
-                        Aucun rôle
-                    </li>
+                <li>
+                    Aucun rôle
+                </li>
                 {% endfor %}
             </ul>
 
@@ -64,7 +64,7 @@ Profil de {{ profile_user.username }}
                     Retour
                 </a>
 
-                <a href="{% url 'users:profile_edit' %}"
+                <a href="{% url 'users:profile_edit' profile_user.pk%}"
                    class="btn btn-primary">
                     Modifier
                 </a>

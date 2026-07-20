@@ -6,6 +6,16 @@ from forum.models import Section
 from users.models import Role
 
 
+def can_see_profile(request, user):
+    if not request.user.is_authenticated:
+        return False
+    if request.user == user:
+        return True
+    if is_admin(request.user):
+        return True
+    return False
+
+
 def is_admin(request):
     if isinstance(request, HttpRequest):
         return request.user.roles.filter(name=Role.ADMIN_NAME).exists()

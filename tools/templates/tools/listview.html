@@ -1,17 +1,35 @@
+{% extends "base.html" %}
 {% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+<div class="listview">
+    <div class="mb-4">
+        {% crispy search_form %}
+    </div>
 
-<div class="mb-4">
-    {% crispy search_form %}
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">Section</th>
+            <th scope="col">Actions</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{ item }}</td>
+            <td>
+                <a href="{% url url_detail item.pk %}">
+                    Gérer
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% if url_create %}
+    <a href="{% url url_create %}">Créer</a>
+    {%endif%}
 </div>
-
-<ul>
-    {% for item in items %}
-    <li>
-        {{ item }}
-        <a href="{% url url_detail item.pk %}">Gérer</a>
-    </li>
-    {% endfor %}
-</ul>
-{% if url_create %}
-<a href="{% url url_create %}">Créer</a>
-{%endif%}
+{% endblock %}

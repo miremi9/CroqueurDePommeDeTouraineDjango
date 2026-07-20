@@ -1,14 +1,12 @@
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import UpdateView, CreateView
 
-from administration.forms import SectionForm, SiteBodyForm
+import tools
+from administration.forms import SectionForm, SiteBodyForm, RoleForm
 from forum.models import Section
 from main.models import SiteBody
 from tools import authorisations
-from tools.authorisations import is_admin
-from tools.views import listview_factory
+from tools.views import listview_factory, formview_factory
 from users.models import Role, User
 
 
@@ -20,38 +18,31 @@ def edit_sections(request):
 SectionAdminListView = listview_factory(Section, 'administration:section_detail', 'administration:section_create',
                                         authorisations.is_admin, 'name')
 RoleAdminListView = listview_factory(Role, 'administration:role_detail', None, authorisations.is_admin, 'name')
-UserAdminListView = listview_factory(User, 'administration:user_detail', None, authorisations.is_admin, 'username')
+UserAdminListView = listview_factory(User, 'users:profile_user', None, authorisations.is_admin, 'username')
 
+SectionEditView = formview_factory(
+    my_model=Section,
+    name_field="name",
+    form=SectionForm,
+    cancel_url="/administration/sections/",
+    my_success_url="/administration/sections/",
+    can_access_function=tools.authorisations.is_admin,
+)
 
-class SectionEdit(LoginRequiredMixin, UserPassesTestMixin, CreateView, UpdateView):
-    model = Section
-    form_class = SectionForm
-    template_name = 'administration/edit_section.html'
-    success_url = reverse_lazy('administration:sections')
+SiteBodyUpdateView = formview_factory(
+    my_model=SiteBody,
+    name_field="title",
+    form=SiteBodyForm,
+    cancel_url=reverse_lazy("forum:index"),
+    my_success_url="/",
+    can_access_function=lambda request: request.user.is_staff,
+)
 
-    def test_func(self):
-        return is_admin(self.request)
-
-    def get_object(self, queryset=None):
-        # On tente de récupérer le pk depuis l'URL
-        pk = self.kwargs.get('pk')
-        if pk:
-            # Si pk existe, on récupère l'instance existante
-            return get_object_or_404(Section, pk=pk)
-        # Sinon, on retourne None pour créer un nouvel objet
-        return None
-
-
-class SiteBodyUpdateView(UpdateView):
-    model = SiteBody
-    form_class = SiteBodyForm
-    template_name = "administration/edit_sitebody.html"
-
-    def get_object(self, queryset=None):
-        obj, created = SiteBody.objects.get_or_create(
-            pk=1
-        )
-        return obj
-
-    def get_success_url(self):
-        return reverse_lazy("forum:index")
+RoleEditView = formview_factory(
+    my_model=Role,
+    name_field="name",
+    form=RoleForm,
+    cancel_url="/administration/roles/",
+    my_success_url="/administration/roles/",
+    can_access_function=tools.authorisations.is_admin,
+)

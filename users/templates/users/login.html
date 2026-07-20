@@ -9,7 +9,9 @@
         {% csrf_token %}
 
         {{ form.as_p }}
-
+        <a href="{% url 'users:password_reset' %}">
+            Mot de passe oublié ?
+        </a>
         <button class="btn btn-primary">
             Se connecter
         </button>

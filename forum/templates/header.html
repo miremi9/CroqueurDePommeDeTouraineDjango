@@ -1,55 +1,159 @@
 {% load static %}
-<header class="site-header">
-    <!-- Navigation Auth (droite) -->
-    <div class="auth-nav">
+
+<header class="site-header py-3 px-3 text-center">
+
+    <!-- Navigation Auth -->
+    <div class="d-flex justify-content-end align-items-start flex-wrap gap-2 mb-3">
         {% if user.is_authenticated %}
-        <a href="{% url 'users:profile' %}" class="btn-green">{{ user.username }}</a>
-        <a href="{% url 'users:logout' %}" class="btn-green">Se déconnecter</a>
+        <a href="{% url 'users:profile' %}"
+           class="btn btn-success btn-sm">
+            {{ user.username }}
+        </a>
+        <a href="{% url 'users:logout' %}"
+           class="btn btn-success btn-sm">
+            Se déconnecter
+        </a>
         {% if user.is_admin %}
-        <div class="admin-buttons">
-            <h4 class="admin-toggle">Administration</h4>
-            <ul>
-                <li><a href="{% url 'administration:sections' %}">Sections</a></li>
-                <li><a href="{% url 'administration:roles' %}">Roles</a></li>
-                <li><a href="{% url 'administration:sitebody_edit' %}">Site</a></li>
-                <li><a href="{% url 'administration:users' %}">Utilisateurs</a></li>
+        <div class="dropdown">
+            <button
+                    class="btn btn-success btn-sm dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                Administration
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item"
+                       href="{% url 'administration:sections' %}">
+                        Sections
+                    </a>
+                </li>
+
+                <li>
+                    <a class="dropdown-item"
+                       href="{% url 'administration:roles' %}">
+                        Rôles
+                    </a>
+                </li>
+
+                <li>
+                    <a class="dropdown-item"
+                       href="{% url 'administration:sitebody_edit' %}">
+                        Site
+                    </a>
+                </li>
+
+                <li>
+                    <a class="dropdown-item"
+                       href="{% url 'administration:users' %}">
+                        Utilisateurs
+                    </a>
+                </li>
             </ul>
+
         </div>
         {% endif %}
         {% else %}
-        <a href="{% url 'users:login' %}" class="btn-green">Se connecter</a>
-        <a href="{% url 'users:register' %}" class="btn-green">S'inscrire</a>
-        {% endif %}
-    </div>
+        <a href="{% url 'users:login' %}"
+           class="btn btn-success btn-sm">
+            Se connecter
+        </a>
 
-    <!-- Titre et Icônes -->
-    <h1 class="site-title">
-        <img src="{{ site_body.logo.url }}" alt="Logo" width="40">
-        <a href="{% url 'forum:index' %}">{{ site_body.title }}</a>
-        <img src="{{ site_body.logo.url }}" alt="Logo" width="40">
+        <a href="{% url 'users:register' %}"
+           class="btn btn-success btn-sm">
+            S'inscrire
+        </a>
+
+        {% endif %}
+
+    </div>
+    <!-- Titre et logos -->
+
+    <h1 class="d-flex justify-content-center align-items-center gap-3
+               my-3 fw-bold">
+
+        {% if site_body.logo %}
+        <img
+                src="{{ site_body.logo.url }}"
+                alt="Logo"
+                width="42"
+                height="42"
+                class="object-fit-contain">
+        {% endif %}
+
+        <a
+                href="{% url 'forum:index' %}"
+                class="text-decoration-none text-dark">
+            {{ site_body.title }}
+        </a>
+
+        {% if site_body.logo %}
+        <img
+                src="{{ site_body.logo.url }}"
+                alt="Logo"
+                width="42"
+                height="42"
+                class="object-fit-contain">
+        {% endif %}
+
     </h1>
 
-    <!-- Navigation Principale (Sections) -->
-    <nav>
-        <ul class="nav-pills">
+
+    <!-- Navigation principale -->
+
+    <nav class="d-flex justify-content-center">
+
+        <ul class="nav nav-pills
+               justify-content-center
+               flex-wrap
+               gap-2
+               p-2
+               rounded
+               bg-light
+               shadow-sm">
+
             {% for section in sections %}
-            <li class="section-button">
-                <a href="{% url 'forum:section_detail' slug=section.slug %}">
-                    <h4>{{ section.name }}</h4>
+
+            <li class="nav-item dropdown">
+
+                <a
+                        href="{% url 'forum:section_detail' slug=section.slug %}"
+                        class="nav-link
+                           {% if section.section_set.exists %}
+                               dropdown-toggle
+                           {% endif %}"
+                >
+                    {{ section.name }}
                 </a>
+
                 {% if section.section_set.exists %}
-                <ul>
+
+                <ul class="dropdown-menu">
+
                     {% for child in section.section_set.all %}
+
                     <li>
-                        <a href="{% url 'forum:section_detail' slug=child.slug %}">
+                        <a
+                                class="dropdown-item"
+                                href="{% url 'forum:section_detail' slug=child.slug %}"
+                        >
                             {{ child.name }}
                         </a>
                     </li>
+
                     {% endfor %}
+
                 </ul>
+
                 {% endif %}
+
             </li>
+
             {% endfor %}
+
         </ul>
+
     </nav>
 </header>

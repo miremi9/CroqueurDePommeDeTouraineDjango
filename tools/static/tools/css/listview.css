@@ -1,0 +1,182 @@
+.listview {
+    width: min(100% - 2rem, 1100px);
+    margin: 3rem auto;
+    padding: 2rem;
+
+    background: var(--color-white, #ffffff);
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Formulaire de recherche */
+.listview form {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 650px;
+    margin: 0 auto;
+}
+
+/* Champ de recherche */
+.listview form input[type="text"],
+.listview form input[type="search"] {
+    flex: 1;
+    min-width: 0;
+
+    padding: 0.75rem 1rem;
+
+    border: 1px solid #d9dfe5;
+    border-radius: 0.6rem;
+
+    background: #f8fafb;
+    color: var(--color-text, #333);
+
+    font-size: 1rem;
+
+    transition: border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.listview form input:focus {
+    outline: none;
+    background: #ffffff;
+    border-color: var(--color-green-soft, #6aaa64);
+    box-shadow: 0 0 0 3px rgba(106, 170, 100, 0.15);
+}
+
+/* Bouton de recherche */
+.listview form button,
+.listview form input[type="submit"] {
+    padding: 0.75rem 1.25rem;
+
+    border: none;
+    border-radius: 0.6rem;
+
+    background: var(--color-green-soft, #6aaa64);
+    color: white;
+
+    font-weight: 600;
+    cursor: pointer;
+
+    transition: background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.listview form button:hover,
+.listview form input[type="submit"]:hover {
+    background: var(--color-green-dark, #4f854b);
+    transform: translateY(-1px);
+}
+
+/* Tableau */
+.listview table {
+    width: 100%;
+    margin-top: 2rem;
+
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+
+    border: 1px solid #e5e8eb;
+    border-radius: 0.75rem;
+}
+
+/* En-tête */
+.listview thead {
+    background: #f4f6f8;
+}
+
+.listview th,
+.listview td {
+    padding: 1rem 1.25rem;
+    text-align: left;
+}
+
+.listview thead th {
+    color: var(--color-text-muted, #6b7280);
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+/* Lignes */
+.listview tbody tr {
+    transition: background 0.2s ease;
+}
+
+.listview tbody tr:not(:last-child) {
+    border-bottom: 1px solid #edf0f2;
+}
+
+.listview tbody tr:hover {
+    background: #f8fafb;
+}
+
+.listview tbody th {
+    font-weight: 600;
+    color: var(--color-text, #333);
+}
+
+/* Liens */
+.listview a {
+    color: var(--color-green-dark, #4f854b);
+    font-weight: 600;
+    text-decoration: none;
+
+    transition: color 0.2s ease;
+}
+
+.listview a:hover {
+    color: var(--color-green-soft, #6aaa64);
+    text-decoration: underline;
+}
+
+/* Bouton Créer */
+.listview > a:last-child {
+    display: inline-block;
+    margin-top: 1.5rem;
+
+    padding: 0.7rem 1.2rem;
+
+    border-radius: 0.6rem;
+
+    background: var(--color-green-soft, #6aaa64);
+    color: white;
+
+    text-decoration: none;
+    font-weight: 600;
+
+    transition: background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.listview > a:last-child:hover {
+    background: var(--color-green-dark, #4f854b);
+    transform: translateY(-1px);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .listview {
+        width: min(100% - 1rem, 1100px);
+        margin: 1rem auto;
+        padding: 1rem;
+    }
+
+    .listview form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .listview form button,
+    .listview form input[type="submit"] {
+        width: 100%;
+    }
+
+    .listview th,
+    .listview td {
+        padding: 0.75rem;
+    }
+}

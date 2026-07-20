@@ -26,7 +26,7 @@ class Section(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} : {self.description} - {self.slug}"
 
 
 @receiver(post_save, sender=Section)

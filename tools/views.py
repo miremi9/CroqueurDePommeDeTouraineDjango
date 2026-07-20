@@ -1,12 +1,15 @@
-from typing import Callable, Type
+from typing import Callable
+from typing import Type
 
 import django_filters
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.files.storage import default_storage
 from django.db import models
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.views.generic.detail import SingleObjectMixin
+from django.views.generic.edit import FormView
 from django_filters.views import FilterView
 
 from tools.forms import SearchForm
@@ -59,6 +62,41 @@ def listview_factory(my_model: Type[models.Model],
             return context
 
     return MyListView
+
+
+def formview_factory(my_model, name_field, form, cancel_url, my_success_url, can_access_function):
+    class ViewEdit(LoginRequiredMixin, UserPassesTestMixin, SingleObjectMixin, FormView):
+        model = my_model
+        form_class = form
+        template_name = "tools/edit_form.html"
+
+        def setup(self, request, *args, **kwargs):
+            # Indispensable pour que SingleObjectMixin puisse chercher l'objet
+            super().setup(request, *args, **kwargs)
+            self.object = self.get_object() if "pk" in self.kwargs else None
+
+        def get_form_kwargs(self):
+            kwargs = super().get_form_kwargs()
+            # Si on a un objet, on le passe au formulaire pour qu'il soit pré-rempli
+            kwargs["instance"] = self.object
+            return kwargs
+
+        def form_valid(self, form):
+            # Le formulaire gère la création (si pas d'instance) ou la mise à jour (si instance)
+            form.save()
+            return HttpResponseRedirect(my_success_url)
+
+        def test_func(self):
+            return can_access_function(self.request)
+
+        def get_context_data(self, **kwargs):
+            context = super().get_context_data(**kwargs)
+            context["object"] = self.object
+            context["name"] = getattr(self.object, name_field, "Nouvel élément")
+            context["cancel_url"] = cancel_url
+            return context
+
+    return ViewEdit
 
 
 @csrf_exempt

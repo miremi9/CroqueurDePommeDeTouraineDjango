@@ -128,7 +128,7 @@ ADMIN_USERNAME = env("ADMIN_USERNAME")
 ADMIN_PASSWORD = env("ADMIN_PASSWORD")
 ADMIN_EMAIL = env("ADMIN_EMAIL")
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
@@ -157,3 +157,6 @@ TINYMCE_DEFAULT_CONFIG = {
 # Assurez-vous d'avoir aussi défini vos médias
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+LOGIN_URL = "users:login"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

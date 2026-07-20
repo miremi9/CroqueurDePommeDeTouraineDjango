@@ -1,3 +1,5 @@
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 
@@ -56,6 +58,16 @@ class ProfileForm(forms.ModelForm):
             "email",
             "profile_picture",
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            "username",
+            "email",
+            "profile_picture",
+        )
 
 
 class ProfilePasswordForm(PasswordChangeForm):
