@@ -70,10 +70,9 @@ class SiteBodyForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
         self.helper = FormHelper()
         self.helper.form_method = "post"
-
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Field("title"),
             Field("background_image"),
@@ -81,12 +80,6 @@ class SiteBodyForm(forms.ModelForm):
             Field("bas_de_page"),
             Field("color"),
             Field("url"),
-
-            # Submit(
-            #     "submit",
-            #     "Enregistrer",
-            #     css_class="btn btn-primary"
-            # )
         )
 
 
@@ -98,6 +91,7 @@ class RoleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        self.helper.form_tag = False
         self.helper.layout = Layout(
             Field("name"),
             Field("description"),
