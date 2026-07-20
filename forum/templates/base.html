@@ -1,4 +1,5 @@
 {% load static %}
+{% load crispy_forms_tags %}
 
 <!doctype html>
 <html lang="fr">
@@ -40,7 +41,68 @@
         event.detail.headers['X-CSRFToken'] =
             document.querySelector('[name=csrfmiddlewaretoken]').value;
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(
+        window.location.search
+    );
+
+    if (params.get("login") === "1") {
+        const modalElement = document.getElementById(
+            "loginModal"
+        );
+        const modal = new bootstrap.Modal(
+            modalElement
+        );
+        modal.show();
+    }
+
+});
     </script>
 
 </body>
+<div
+    class="modal fade"
+    id="loginModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Se connecter
+                </h5>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                ></button>
+            </div>
+
+            <div class="modal-body">
+                <form
+                    method="post"
+                    action="{% url 'users:login' %}">
+                    {% csrf_token %}
+                    {% crispy login_form %}
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary">
+                        Se connecter
+                    </button>
+                </form>
+
+                <a href="{% url 'users:password_reset' %}">
+                    Mot de passe oublié ?
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
 </html>

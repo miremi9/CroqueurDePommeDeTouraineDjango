@@ -71,7 +71,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'forum.context_processors.forum_sections',
-                'forum.context_processors.site_body'
+                'forum.context_processors.site_body',
+                'forum.context_processors.login_form'
             ],
         },
     },

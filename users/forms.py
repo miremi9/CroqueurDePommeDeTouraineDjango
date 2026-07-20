@@ -1,7 +1,7 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 
 from .models import User
 
@@ -23,6 +23,17 @@ class RegisterForm(forms.ModelForm):
             "username",
             "email",
         ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            "username",
+            "email",
+            "password1",
+            "password2",
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -67,6 +78,17 @@ class ProfileForm(forms.ModelForm):
             "username",
             "email",
             "profile_picture",
+        )
+
+
+class CrispyAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
+        self.helper.layout = Layout(
+            "username",
+            "password",
         )
 
 

@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.mixins import UserPassesTestMixin, LoginRequiredMixin
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Case, When, Value, IntegerField, QuerySet
 from django.http import HttpResponseForbidden
 # Create your views here.
@@ -88,7 +88,7 @@ class SectionDetailView(UserPassesTestMixin, DetailView):
         return context
 
 
-class MainPage(LoginRequiredMixin, TemplateView):
+class MainPage(TemplateView):
     template_name = "forum/section.html"
 
     def get_posts(self):

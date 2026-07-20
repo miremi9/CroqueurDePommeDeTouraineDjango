@@ -56,10 +56,14 @@
         </div>
         {% endif %}
         {% else %}
-        <a href="{% url 'users:login' %}"
-           class="btn btn-success btn-sm">
+        <button
+                type="button"
+                class="btn-green"
+                data-bs-toggle="modal"
+                data-bs-target="#loginModal"
+        >
             Se connecter
-        </a>
+        </button>
 
         <a href="{% url 'users:register' %}"
            class="btn btn-success btn-sm">

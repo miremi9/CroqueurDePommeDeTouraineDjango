@@ -1,13 +1,12 @@
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 
 from tools.authorisations import can_see_profile
 from tools.views import formview_factory
-from users.forms import RegisterForm, ProfileForm
+from users.forms import RegisterForm, ProfileForm, CrispyAuthenticationForm
 from users.models import User
 
 
@@ -15,7 +14,7 @@ from users.models import User
 
 def login_view(request):
     if request.method == "POST":
-        form = AuthenticationForm(
+        form = CrispyAuthenticationForm(
             request,
             data=request.POST
         )
@@ -27,7 +26,7 @@ def login_view(request):
             return redirect("forum:index")
 
     else:
-        form = AuthenticationForm()
+        form = CrispyAuthenticationForm()
 
     return render(
         request,
