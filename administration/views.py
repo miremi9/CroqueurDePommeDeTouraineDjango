@@ -36,7 +36,7 @@ SiteBodyUpdateView = formview_factory(
     cancel_url=reverse_lazy("forum:index"),
     my_success_url="/",
     can_access_function=lambda request: request.user.is_staff,
-    instance=SiteBody.get_solo()
+    instance=lambda: SiteBody.get_solo()
 )
 
 RoleEditView = formview_factory(

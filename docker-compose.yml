@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+
+  # -------------------- DATABASE --------------------
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # -------------------- DJANGO BACKEND --------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.prod
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+      - static_volume:/app/staticfiles
+    restart: always
+
+  # -------------------- NGINX (PROXY + HTTPS) --------------------
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /root/CroqueurDePommeDeTouraine/certbot/www:/var/www/certbot
+      - uploads:/app/uploads:ro
+      - static_volume:/app/staticfiles:ro
+    depends_on:
+      - backend
+    restart: always
+
+# -------------------- VOLUMES --------------------
+volumes:
+  pg-data:
+  uploads:
+  static_volume:
