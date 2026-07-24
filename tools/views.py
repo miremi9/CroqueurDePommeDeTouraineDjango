@@ -77,7 +77,7 @@ def formview_factory(my_model, name_field, form, cancel_url, my_success_url, can
                 self.object = self.get_object()
                 return
             elif instance:
-                self.object = instance
+                self.object = instance()
             else:
                 self.object = None
 
