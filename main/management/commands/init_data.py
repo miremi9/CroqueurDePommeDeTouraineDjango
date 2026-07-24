@@ -22,6 +22,8 @@ class Command(BaseCommand):
         )
 
     def create_admin(self):
+        if User.objects.filter(username=settings.ADMIN_USERNAME).exists():
+            return
 
         admin = User.objects.create_superuser(
             username=settings.ADMIN_USERNAME,
