@@ -25,7 +25,11 @@
         <div class="section-card__body">
             {{ post.content|safe }}
         </div>
-
+        {% if post.file %}
+        <a href="{{ post.file.url }}" target="_blank">
+            {{ post.file.name }}
+        </a>
+        {% endif %}
         {% if user == post.author %}
         <div class="section-card__footer">
             <button class="btn btn-outline-primary btn-sm"
@@ -41,6 +45,7 @@
 
         </div>
         {% endif %}
+
     </article>
 
     {% url 'forum:article_update' slug=post.section.slug id=post.id as update_url %}

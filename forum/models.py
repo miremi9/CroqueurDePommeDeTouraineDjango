@@ -3,7 +3,6 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from tools.models import File
 from users.models import Role, User
 
 
@@ -46,7 +45,7 @@ class Article(models.Model):
     pinned_on_top = models.BooleanField(default=False)
     pinned_on_main_page = models.BooleanField(default=False)
     suppressed = models.BooleanField(default=False)
-    illustrations = models.ManyToManyField(File, blank=True)
+    file = models.FileField(upload_to='articles/files/', blank=True, null=True)
 
     def __str__(self):
         return self.title

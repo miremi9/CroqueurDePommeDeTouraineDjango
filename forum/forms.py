@@ -9,7 +9,7 @@ from forum.models import Article
 class ArticleForm(forms.ModelForm):
     class Meta:
         model = Article
-        fields = ['title', 'content']
+        fields = ['title', 'content', 'file']
         widgets = {
             "content": TinyMCE(),
         }
@@ -19,5 +19,4 @@ class ArticleForm(forms.ModelForm):
 
         self.helper = FormHelper()
         self.helper.form_tag = False
-
-        self.helper.layout = Layout('title', 'content', )
+        self.helper.layout = Layout('title', 'content', 'file')
