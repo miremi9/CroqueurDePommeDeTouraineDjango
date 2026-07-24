@@ -49,3 +49,48 @@ img {
     margin: 2rem auto;
     padding: 0 1rem;
 }
+
+/* Tables (contenu TinyMCE / articles) */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.25rem 0;
+    background: var(--color-white);
+    border: 1px solid #c5cfc0;
+}
+
+table th,
+table td {
+    border: 1px solid #c5cfc0;
+    padding: 0.65rem 0.85rem;
+    vertical-align: top;
+    text-align: left;
+}
+
+table th {
+    background: rgba(106, 173, 58, 0.18);
+    font-weight: 700;
+    color: var(--color-text);
+}
+
+/* Première ligne = même traitement que thead */
+table tr:first-child th,
+table tr:first-child td {
+    background: rgba(106, 173, 58, 0.18);
+    font-weight: 700;
+}
+
+table tbody tr:nth-child(even) {
+    background: rgba(106, 173, 58, 0.08);
+}
+
+table tbody tr:nth-child(odd) {
+    background: var(--color-white);
+}
+
+table caption {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-align: left;
+}
