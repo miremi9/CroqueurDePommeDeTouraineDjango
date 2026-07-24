@@ -35,8 +35,12 @@ class SectionForm(BasicButtonMixin, forms.ModelForm):
         self.helper.form_tag = False
         self.helper.layout = Layout(
             'name', 'description', 'slug', 'parent_section',
-            'can_post', 'can_read',
-        )
+            'can_post', 'can_read', )
+
+        if not instance.pk:
+            admin_role = Role.objects.get(name=Role.ADMIN_NAME)
+            self.fields['can_post'].initial = [admin_role.pk]
+            self.fields['can_read'].initial = [admin_role.pk]
 
         # Optionnel : si vous voulez forcer un rendu propre des ManyToMany
         self.fields['can_post'].help_text = "Sélectionnez les rôles autorisés à publier."
