@@ -142,8 +142,3 @@ TINYMCE_DEFAULT_CONFIG = {
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = "users:login"
-
-PASSWORD_HASHERS = [
-    "users.hashers.SpringBCryptPasswordHasher",
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
-]
