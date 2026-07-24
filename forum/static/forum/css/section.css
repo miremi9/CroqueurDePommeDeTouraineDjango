@@ -51,15 +51,6 @@
     margin-bottom: 0;
 }
 
-/* Contenu TinyMCE : image à gauche comme sur la maquette */
-.section-card__body img {
-    float: left;
-    margin: 0.15rem 1.5rem 1rem 0;
-    border-radius: var(--radius);
-    max-width: min(280px, 45%);
-    height: auto;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
 
 .section-card__body::after {
     content: "";
