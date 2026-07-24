@@ -161,8 +161,3 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 LOGIN_URL = "users:login"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
-PASSWORD_HASHERS = [
-    "users.hashers.SpringBCryptPasswordHasher",
-    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
-]
