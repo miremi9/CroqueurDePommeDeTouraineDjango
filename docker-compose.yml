@@ -42,6 +42,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      #      - ./nginx-local.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - /root/CroqueurDePommeDeTouraine/certbot/www:/var/www/certbot
