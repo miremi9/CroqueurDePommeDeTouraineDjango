@@ -13,7 +13,7 @@ class Command(BaseCommand):
         self.create_roles()
         self.create_sections()
         self.create_site()
-        # self.create_admin()
+        self.create_admin()
 
         self.stdout.write(
             self.style.SUCCESS(
