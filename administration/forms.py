@@ -4,11 +4,11 @@ from django import forms
 
 from forum.models import Section
 from main.models import SiteBody
-from tools.forms import BasicButtonMixin
+from tools.forms import FormMixin
 from users.models import Role
 
 
-class SectionForm(BasicButtonMixin, forms.ModelForm):
+class SectionForm(FormMixin, forms.ModelForm):
     class Meta:
         model = Section
         fields = ['name', 'description', 'slug', 'can_post', 'can_read', 'parent_section']
@@ -70,7 +70,7 @@ class SectionForm(BasicButtonMixin, forms.ModelForm):
         return cleaned_data
 
 
-class SiteBodyForm(forms.ModelForm):
+class SiteBodyForm(FormMixin, forms.ModelForm):
     class Meta:
         model = SiteBody
         fields = [
@@ -93,7 +93,7 @@ class SiteBodyForm(forms.ModelForm):
         )
 
 
-class RoleForm(forms.ModelForm):
+class RoleForm(FormMixin, forms.ModelForm):
     class Meta:
         model = Role
         fields = ['name', 'description']

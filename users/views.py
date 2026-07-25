@@ -95,5 +95,4 @@ EditProfileView = formview_factory(
     cancel_url=reverse_lazy("users:profile"),
     my_success_url=reverse_lazy("users:profile"),
     can_access_function=lambda request: request.user.is_authenticated,
-    need_request=True,
 )

@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 
 import tools.authorisations
+from tools.forms import FormMixin
 from .models import User
 
 
@@ -62,7 +63,7 @@ class RegisterForm(forms.ModelForm):
         return user
 
 
-class ProfileForm(forms.ModelForm):
+class ProfileForm(FormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = [
@@ -75,12 +76,10 @@ class ProfileForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
         fields = ["username", "email"]
         if tools.authorisations.is_admin(self.request.user):
             fields.append("roles")
-
-        super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(*fields)

@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Submit, Field, HTML
+from crispy_forms.layout import Layout, Submit, Field
 from django import forms
 
 
@@ -21,56 +21,15 @@ class SearchForm(forms.Form):
         )
 
 
-class BasicButtonMixin(object):
+class FormMixin(object):
     """
-    Fournis des methodes pour rajotuer des boutons aux formulaires crispy
-    utilise les attributs cancel_url et success_url (les recupere automatiquement des kwargs)
+    Mixin to add forms to a model
+    provide cancel_url and request from kwargs
     """
 
     def __init__(self, *args, **kwargs):
         self.cancel_url = kwargs.pop('cancel_url', None)
-        self.success_url = kwargs.pop('success_url', None)
-
-        super().__init__(*args, **kwargs, )
-
-    def get_cancel_button(self):
-        return HTML(
-            f"""
-                    <a
-                        href="{self.cancel_url}"
-                        class="btn btn-outline-secondary"
-                    >
-                        Annuler
-                    </a>
-                    """
-        )
-
-    def get_register_button(self):
-        def get_register_button(self):
-            """
-            Retourne un bouton Enregistrer.
-            """
-
-            return Submit(
-                "submit",
-                "Enregistrer",
-                css_class="btn btn-primary",
-            )
-
-    def get_buttons(self):
-        """
-        Retourne les boutons standards du formulaire.
-        """
-
-        buttons = [
-            self.get_register_button(),
-        ]
-
-        cancel_button = self.get_cancel_button()
-
-        if cancel_button:
-            buttons.append(
-                cancel_button
-            )
-
-        return buttons
+        self.request = kwargs.pop('request', None)
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.layout = Layout()

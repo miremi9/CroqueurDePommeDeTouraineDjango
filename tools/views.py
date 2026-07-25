@@ -64,7 +64,7 @@ def listview_factory(my_model: Type[models.Model],
     return MyListView
 
 
-def formview_factory(my_model, name_field, form, cancel_url, my_success_url, can_access_function, instance=None, need_request=False):
+def formview_factory(my_model, name_field, form, cancel_url, my_success_url, can_access_function, instance=None, ):
     class ViewEdit(LoginRequiredMixin, UserPassesTestMixin, SingleObjectMixin, FormView):
         model = my_model
         form_class = form
@@ -85,8 +85,8 @@ def formview_factory(my_model, name_field, form, cancel_url, my_success_url, can
             kwargs = super().get_form_kwargs()
             # Si on a un objet, on le passe au formulaire pour qu'il soit pré-rempli
             kwargs["instance"] = self.object
-            if need_request:
-                kwargs["request"] = self.request
+
+            kwargs["request"] = self.request
             if self.request.method in ("POST", "PUT"):
                 kwargs["files"] = self.request.FILES
             return kwargs
