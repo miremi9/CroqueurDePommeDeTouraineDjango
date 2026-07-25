@@ -1,5 +1,5 @@
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Layout, Field
+from crispy_forms.layout import Layout, Field, Column, Row
 from django import forms
 
 from forum.models import Section
@@ -15,6 +15,7 @@ class SectionForm(BasicButtonMixin, forms.ModelForm):
         widgets = {
             'can_post': forms.CheckboxSelectMultiple(),
             'can_read': forms.CheckboxSelectMultiple(),
+            'description': forms.Textarea(attrs={'cols': 80, 'rows': 2}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -33,9 +34,14 @@ class SectionForm(BasicButtonMixin, forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-            'name', 'description', 'slug', 'parent_section',
-            'can_post', 'can_read', )
+        self.helper.layout = Layout(Column(
+            Row('name'),
+            Row('description'),
+            Row('slug'),
+            Row('parent_section'),
+            Row(Column('can_post'), Column('can_read'))
+        )
+        )
 
         if not instance.pk:
             admin_role = Role.objects.get(name=Role.ADMIN_NAME)
@@ -45,6 +51,10 @@ class SectionForm(BasicButtonMixin, forms.ModelForm):
         # Optionnel : si vous voulez forcer un rendu propre des ManyToMany
         self.fields['can_post'].help_text = "Sélectionnez les rôles autorisés à publier."
         self.fields['can_read'].help_text = "Sélectionnez les rôles autorisés à lire."
+
+    def clean_slug(self):
+        slug = self.cleaned_data["slug"]
+        return slug.lower()
 
     def clean(self):
         cleaned_data = super().clean()
@@ -67,9 +77,7 @@ class SiteBodyForm(forms.ModelForm):
             "title",
             "background_image",
             "bas_de_page",
-            "logo",
-            "color",
-            "url",
+            "logo"
         ]
 
     def __init__(self, *args, **kwargs):
@@ -82,8 +90,6 @@ class SiteBodyForm(forms.ModelForm):
             Field("background_image"),
             Field("logo"),
             Field("bas_de_page"),
-            Field("color"),
-            Field("url"),
         )
 
 
