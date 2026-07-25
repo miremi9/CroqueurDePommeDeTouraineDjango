@@ -1,0 +1,29 @@
+{% load crispy_forms_tags %}
+{% load forum_extras %}
+
+<article class="section-card">
+    <h2 class="section-card__title">{{ post.title }}</h2>
+    <div class="section-card__body">
+        {{ post.content|safe }}
+    </div>
+    {% if post.file %}
+    <a href="{{ post.file.url }}" target="_blank">
+        {{ post.file.name }}
+    </a>
+    {% endif %}
+    {% if user == post.author %}
+    <div class="section-card__footer">
+        <button class="btn btn-outline-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#updateModal{{ post.id }}">
+            Modifier
+        </button>
+
+        {% include "forum/article/_pin_button.html" with post=post %}
+        {% include "forum/article/_main_page_button.html" with post=post %}
+    </div>
+    {% endif %}
+</article>
+
+{% url 'forum:article_update' slug=post.section.slug id=post.id as update_url %}
+{% render_article_modal post.edit_form "updateModal"|concat:post.id "Modifier l'article" update_url "Enregistrer" %}
