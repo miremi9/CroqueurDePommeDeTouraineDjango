@@ -1,7 +1,7 @@
 from .base import *
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

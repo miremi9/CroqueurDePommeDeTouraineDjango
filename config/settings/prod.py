@@ -43,3 +43,11 @@ CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[f"https://{host}" for host in ALLOWED_HOSTS],
 )
+
+EMAIL_BACKEND = env('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = env('MAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = env('MAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = env('MAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = env('MAIL_USERNAME', default='')
+EMAIL_HOST_PASSWORD = env('MAIL_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default=EMAIL_HOST_USER)
