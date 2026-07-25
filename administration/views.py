@@ -18,7 +18,7 @@ def edit_sections(request):
 SectionAdminListView = listview_factory(Section, 'administration:section_detail', 'administration:section_create',
                                         authorisations.is_admin, 'name')
 RoleAdminListView = listview_factory(Role, 'administration:role_detail', None, authorisations.is_admin, 'name')
-UserAdminListView = listview_factory(User, 'users:profile_user', None, authorisations.is_admin, 'username')
+UserAdminListView = listview_factory(User, 'users:profile_edit', None, authorisations.is_admin, 'username')
 
 SectionEditView = formview_factory(
     my_model=Section,

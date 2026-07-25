@@ -3,6 +3,7 @@ from crispy_forms.layout import Layout
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
 
+import tools.authorisations
 from .models import User
 
 
@@ -67,18 +68,22 @@ class ProfileForm(forms.ModelForm):
         fields = [
             "username",
             "email",
-            "profile_picture",
+            'roles',
         ]
+        widgets = {
+            'roles': forms.CheckboxSelectMultiple(),
+        }
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop('request', None)
+        fields = ["username", "email"]
+        if tools.authorisations.is_admin(self.request.user):
+            fields.append("roles")
+
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_tag = False
-        self.helper.layout = Layout(
-            "username",
-            "email",
-            "profile_picture",
-        )
+        self.helper.layout = Layout(*fields)
 
 
 class CrispyAuthenticationForm(AuthenticationForm):
