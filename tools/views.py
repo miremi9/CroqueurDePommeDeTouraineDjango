@@ -5,6 +5,7 @@ import django_filters
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.files.storage import default_storage
 from django.db import models
+from django.db.models import Q
 from django.http import JsonResponse, HttpResponseRedirect
 from django.http.request import HttpRequest
 from django.views.decorators.csrf import csrf_exempt
@@ -35,6 +36,11 @@ def listview_factory(my_model: Type[models.Model],
                      url_create: str | None,
                      function_test: Callable[[HttpRequest], bool] = lambda request: True,
                      order_by_attribut: str | None = None, ):
+    """genere une vue de l'ensemble des elements
+    Pour le filtre, le modele doit avoir l'attribut SEARCH_FIELD qui contient l'ensemble des champs
+
+    """
+
     class MyListView(LoginRequiredMixin, UserPassesTestMixin, FilterView):
         model = my_model
         template_name = 'tools/listview.html'
@@ -44,14 +50,33 @@ def listview_factory(my_model: Type[models.Model],
         def test_func(self):
             return function_test(self.request)
 
+        def get_search_fields(self):
+            return getattr(
+                self.model,
+                "SEARCH_FIELDS",
+                ()
+            )
+
         def get_queryset(self):
             queryset = super().get_queryset()
-            # Gestion du filtre via la barre d'URL : ?q=recherche
-            query = self.request.GET.get('q')
-            if query:
-                queryset = queryset.filter(name__icontains=query)
+
+            search = self.request.GET.get("q", "").strip()
+            search_fields = self.get_search_fields()
+
+            if search and search_fields:
+                search_query = Q()
+
+                for field in search_fields:
+                    search_query |= Q(
+                        **{
+                            f"{field}__icontains": search
+                        }
+                    )
+                queryset = queryset.filter(search_query)
             if order_by_attribut:
-                return queryset.order_by(order_by_attribut)
+                queryset = queryset.order_by(order_by_attribut)
+
+            return queryset
 
         def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)

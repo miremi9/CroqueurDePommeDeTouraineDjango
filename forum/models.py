@@ -7,6 +7,7 @@ from users.models import Role, User
 
 
 class Section(models.Model):
+    SEARCH_FIELDS = ("name", "description", "slug")
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     slug = models.SlugField(max_length=100, unique=True)

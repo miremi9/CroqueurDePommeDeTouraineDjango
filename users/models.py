@@ -19,6 +19,7 @@ class SpaceAllowedUsernameValidator(UnicodeUsernameValidator):
 
 # Create your models here.
 class User(AbstractUser):
+    SEARCH_FIELDS = ("username", "email")
     username_validator = SpaceAllowedUsernameValidator()
     username = models.CharField(
         _("username"),
@@ -56,6 +57,7 @@ def add_default_role(sender, instance, created, **kwargs):
 
 
 class Role(models.Model):
+    SEARCH_FIELDS = ("name", "description")
     ADMIN_NAME = "Administrateur"
     MEMBER_NAME = "Membre"
     MODO_NAME = "Modérateur"
