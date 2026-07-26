@@ -18,14 +18,11 @@
     <link rel="stylesheet" href="{% static 'tools/css/listview.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/formcontent.css' %}">
     <style>
-        body {
         {% if site_body.background_image %}
+        body::before {
             background-image: url('{{ site_body.background_image.url }}');
-        {% endif %}
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
         }
+        {% endif %}
     </style>
 </head>
 
