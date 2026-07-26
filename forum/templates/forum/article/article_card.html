@@ -18,6 +18,16 @@
                 data-bs-target="#updateModal{{ post.id }}">
             Modifier
         </button>
+        <form method="post"
+              action="{% url 'forum:article_delete' slug=post.section.slug id=post.id %}"
+              class="d-inline">
+            {% csrf_token %}
+            <button type="submit"
+                    class="btn btn-outline-danger btn-sm"
+                    onclick="return confirm('Supprimer cet article ?');">
+                Supprimer
+            </button>
+        </form>
 
         {% include "forum/article/_pin_button.html" with post=post %}
         {% include "forum/article/_main_page_button.html" with post=post %}

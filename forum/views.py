@@ -1,11 +1,12 @@
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Case, When, Value, IntegerField, QuerySet
+from django.forms import Form
 from django.http import HttpResponseForbidden
 # Create your views here.
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
-from django.views.generic import DetailView, CreateView, UpdateView, TemplateView
+from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
 import tools.authorisations
 from forum.forms import ArticleForm
@@ -50,6 +51,15 @@ class ArticleUpdateView(ArticleBaseView, UpdateView):
     def get_success_url(self):
         # Redirige vers la page de la section du post
         return reverse('forum:section_detail', kwargs={'slug': self.object.section.slug})
+
+
+class ArticleDeleteView(ArticleBaseView, DeleteView):
+    pk_url_kwarg = "id"
+    http_method_names = ["post"]
+    form_class = Form  # empty form: ArticleBaseView would otherwise use ArticleForm
+
+    def get_success_url(self):
+        return reverse('forum:section_detail', kwargs={'slug': self.kwargs['slug']})
 
 
 class SectionDetailView(UserPassesTestMixin, DetailView):
