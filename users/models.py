@@ -1,12 +1,37 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.deconstruct import deconstructible
+from django.utils.translation import gettext_lazy as _
+
+
+@deconstructible
+class SpaceAllowedUsernameValidator(UnicodeUsernameValidator):
+    regex = r"^[\w.@+\- ]+\Z"
+    message = _(
+        "Enter a valid username. This value may contain only letters, "
+        "numbers, spaces, and @/./+/-/_ characters."
+    )
 
 
 # Create your models here.
 class User(AbstractUser):
+    username_validator = SpaceAllowedUsernameValidator()
+    username = models.CharField(
+        _("username"),
+        max_length=150,
+        unique=True,
+        help_text=_(
+            "Required. 150 characters or fewer. Letters, digits, spaces and @/./+/-/_ only."
+        ),
+        validators=[username_validator],
+        error_messages={
+            "unique": _("A user with that username already exists."),
+        },
+    )
     email = models.EmailField(unique=True)
     profile_picture = models.ImageField(upload_to='uploads/',
                                         null=True,
