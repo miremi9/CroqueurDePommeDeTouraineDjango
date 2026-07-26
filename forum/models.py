@@ -10,8 +10,8 @@ class Section(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     slug = models.SlugField(max_length=100, unique=True)
-    can_post = models.ManyToManyField(Role, related_name='can_post_sections', blank=True)
-    can_read = models.ManyToManyField(Role, related_name='can_read_sections', blank=True)
+    can_post = models.ManyToManyField(Role, related_name='can_post_sections', blank=True, verbose_name="Qui peut ecrire")
+    can_read = models.ManyToManyField(Role, related_name='can_read_sections', blank=True, verbose_name="Qui peut acceder")
     parent_section = models.ForeignKey('self', on_delete=models.CASCADE, blank=True, null=True)
 
     def clean(self):
