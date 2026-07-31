@@ -13,13 +13,11 @@
     {% endif %}
     {% if user == post.author or user.is_admin %}
     <div class="section-card__footer">
-        {%if user == post.author %}
         <button class="btn btn-outline-primary btn-sm"
                 data-bs-toggle="modal"
                 data-bs-target="#updateModal{{ post.id }}">
             Modifier
         </button>
-        {%endif%}
         <form method="post"
               action="{% url 'forum:article_delete' slug=post.section.slug id=post.id %}"
               class="d-inline">
