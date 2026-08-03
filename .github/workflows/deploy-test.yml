@@ -20,9 +20,5 @@ jobs:
             cd /root/apps/croqueurs-test
             git fetch origin
             git reset --hard origin/test-live
-            
             docker compose build
             docker compose up -d
-            
-            docker compose exec -T backend uv run python manage.py migrate
-            docker compose exec -T backend uv run python manage.py collectstatic --noinput
