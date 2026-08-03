@@ -1,0 +1,24 @@
+name: Deploy Test
+
+on:
+  push:
+    branches:
+      - test-live
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: root
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd /root/apps/croqueurs-test
+            git fetch origin
+            git reset --hard origin/test-live
+            docker compose build
+            docker compose up -d
