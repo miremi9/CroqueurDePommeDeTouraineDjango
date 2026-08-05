@@ -120,7 +120,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 AUTH_USER_MODEL = "users.User"
 # Dossier où seront stockées les images uploadées (dans MEDIA_ROOT)
 TINYMCE_DEFAULT_CONFIG = {
-    "height": 500,
+    "height": 400,
     "menubar": True,
     "license_key": "gpl",
     "plugins": (

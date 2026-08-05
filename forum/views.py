@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.db.models import Case, When, Value, IntegerField, QuerySet
@@ -29,6 +30,7 @@ class ArticleBaseView(UserPassesTestMixin):
         return tools.authorisations.can_post(self.request.user, section)
 
     def get_success_url(self):
+        messages.success(self.request, "Article crée avec succès.")
         return reverse('forum:section_detail', kwargs={'slug': self.object.section.slug})
 
 
@@ -49,7 +51,7 @@ class ArticleUpdateView(ArticleBaseView, UpdateView):
         return kwargs
 
     def get_success_url(self):
-        # Redirige vers la page de la section du post
+        messages.info(self.request, "Article modifié avec succès.")
         return reverse('forum:section_detail', kwargs={'slug': self.object.section.slug})
 
 
@@ -59,6 +61,7 @@ class ArticleDeleteView(ArticleBaseView, DeleteView):
     form_class = Form  # empty form: ArticleBaseView would otherwise use ArticleForm
 
     def get_success_url(self):
+        messages.success(self.request, "Article supprimé avec succès.")
         return reverse('forum:section_detail', kwargs={'slug': self.kwargs['slug']})
 
 

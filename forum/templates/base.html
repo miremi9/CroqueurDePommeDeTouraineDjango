@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="{% static 'forum/css/header.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/section.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'forum/css/toast.css' %}">
     <link rel="stylesheet" href="{% static 'tools/css/listview.css' %}">
     <link rel="stylesheet" href="{% static 'forum/css/formcontent.css' %}">
     <style>
@@ -63,9 +64,16 @@
         modal.show();
     }
 
+    document.querySelectorAll(".toast-container .toast").forEach(function (el) {
+        bootstrap.Toast.getOrCreateInstance(el).show();
+    });
 });
     </script>
 {% include "forum/login_modal.html" %}
+
+{% if messages %}
+    {% include "toast_message.html" %}
+{% endif %}
 </body>
 
 

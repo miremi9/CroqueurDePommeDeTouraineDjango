@@ -1,0 +1,28 @@
+<div class="toast-container">
+    {% for message in messages %}
+    <div class="toast custom-toast toast-{{ message.tags }}"
+         role="alert"
+         aria-live="assertive"
+         aria-atomic="true"
+         data-bs-delay="5000">
+        <div class="toast-header">
+            <div class="toast-icon">
+                {% if message.tags == "success" %}
+                ✓
+                {% elif message.tags == "error" %}
+                !
+                {% elif message.tags == "warning" %}
+                ⚠
+                {% else %}
+                i
+                {% endif %}
+            </div>
+            <strong class="me-auto">Notification</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Fermer"></button>
+        </div>
+        <div class="toast-body">
+            {{ message }}
+        </div>
+    </div>
+    {% endfor %}
+</div>
