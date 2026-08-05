@@ -17,18 +17,12 @@ jobs:
           command_timeout: 15m
           username: root
           key: ${{ secrets.SERVER_SSH_KEY }}
-
           script: |
             cd /root/apps/croqueurs-prod
-
+          
             git fetch origin
             git reset --hard origin/master
-
+          
             docker compose build
             docker compose up -d
-
-            docker compose exec -T backend uv run python manage.py migrate
-            docker compose exec -T backend uv run python manage.py collectstatic --noinput
-            docker compose exec -T backend uv run python manage.py check
-
             docker image prune -f
