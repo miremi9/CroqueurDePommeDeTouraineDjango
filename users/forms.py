@@ -2,6 +2,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
+from django.contrib.auth.password_validation import validate_password
 
 import tools.authorisations
 from tools.forms import FormMixin
@@ -11,7 +12,12 @@ from .models import User
 class RegisterForm(forms.ModelForm):
     password1 = forms.CharField(
         label="Mot de passe",
-        widget=forms.PasswordInput
+        widget=forms.PasswordInput,
+        help_text=(
+            "Le mot de passe doit contenir au moins 8 caractères, "
+            "ne pas être trop similaire à vos informations personnelles, "
+            "ne pas être un mot de passe courant et ne pas être uniquement numérique."
+        ),
     )
 
     password2 = forms.CharField(
@@ -36,6 +42,14 @@ class RegisterForm(forms.ModelForm):
             "password1",
             "password2",
         )
+
+    def clean_password1(self):
+        password = self.cleaned_data.get("password1")
+
+        if password:
+            validate_password(password, self.instance)
+
+        return password
 
     def clean(self):
         cleaned_data = super().clean()
