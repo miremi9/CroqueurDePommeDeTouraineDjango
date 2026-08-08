@@ -78,25 +78,60 @@ class RegisterForm(forms.ModelForm):
 
 
 class ProfileForm(FormMixin, forms.ModelForm):
+    new_password = forms.CharField(
+        label="Nouveau mot de passe",
+        required=False,
+        widget=forms.PasswordInput,
+    )
+
     class Meta:
         model = User
         fields = [
             "username",
             "email",
-            'roles',
+            "roles",
         ]
+
         widgets = {
-            'roles': forms.CheckboxSelectMultiple(),
+            "roles": forms.CheckboxSelectMultiple(),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         fields = ["username", "email"]
+
+        if self.instance == self.request.user:
+            fields.append("new_password")
+
         if tools.authorisations.is_admin(self.request.user):
             fields.append("roles")
+
         self.helper = FormHelper()
         self.helper.form_tag = False
         self.helper.layout = Layout(*fields)
+
+    def clean_new_password(self):
+        password = self.cleaned_data.get("new_password")
+
+        if password:
+            validate_password(password, self.instance)
+
+        return password
+
+    def save(self, commit=True):
+        user = super().save(commit=False)
+
+        password = self.cleaned_data.get("new_password")
+
+        if password:
+            user.set_password(password)
+
+        if commit:
+            user.save()
+            self.save_m2m()
+
+        return user
 
 
 class CrispyAuthenticationForm(AuthenticationForm):
