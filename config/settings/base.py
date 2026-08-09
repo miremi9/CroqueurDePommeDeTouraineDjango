@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'administration',
     'forum.apps.ForumConfig',
     'tools',
-    'minigame.apps.MinigameConfig',
+    'minigame',
 
 ]
 
