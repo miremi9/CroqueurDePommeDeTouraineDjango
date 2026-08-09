@@ -131,6 +131,32 @@ body {
     color: var(--apple);
 }
 
+.tree-zone {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 0.5rem;
+}
+
+.tree-zone.is-targeting .tree-btn {
+    cursor: crosshair;
+}
+
+.tree-zone.is-targeting .tree-svg {
+    filter: drop-shadow(0 0 0 rgba(212, 160, 23, 0)) drop-shadow(0 0 10px rgba(212, 160, 23, 0.65));
+}
+
+.bouture-hint {
+    margin: 0;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(212, 160, 23, 0.18);
+    color: var(--ink);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
 .tree-btn {
     position: relative;
     border: none;
@@ -140,6 +166,20 @@ body {
     border-radius: 50%;
     transition: transform 0.08s ease;
     -webkit-tap-highlight-color: transparent;
+}
+
+.tree-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 0.75rem;
+    font-weight: 650;
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--ink);
+    box-shadow: 0 2px 6px rgba(30, 42, 24, 0.25);
+    pointer-events: none;
 }
 
 .tree-btn:active,
@@ -297,6 +337,15 @@ body {
 .tool-btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
+}
+
+.tool-item.is-armed {
+    border-color: var(--accent);
+    background: rgba(212, 160, 23, 0.18);
+}
+
+.tool-item.is-armed .tool-btn {
+    background: var(--accent);
 }
 
 .buff-bar {
