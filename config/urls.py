@@ -26,6 +26,7 @@ urlpatterns = [
     path('', include('forum.urls')),
     path('users/', include('users.urls')),
     path('administration/', include('administration.urls')),
+    path('minigame/', include('minigame.urls')),
     path("tinymce/upload/", tinymce_upload, name="tinymce_upload"),
 ]
 if settings.DEBUG:
@@ -33,3 +34,4 @@ if settings.DEBUG:
         settings.MEDIA_URL,
         document_root=settings.MEDIA_ROOT,
     )
+handler404 = "forum.views.custom_404"
