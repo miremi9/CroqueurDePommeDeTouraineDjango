@@ -15,6 +15,13 @@
             <p class="tagline">Récolte des pommes, plante des variétés, élargis ton verger.</p>
         </header>
 
+        <aside id="tools-panel" class="tools-panel" aria-label="Outils du verger" hidden>
+            <div class="panel-header">
+                <h2>Outils</h2>
+            </div>
+            <ul id="tools-list" class="tools-list"></ul>
+        </aside>
+
         <section class="play-area" aria-label="Zone de jeu">
             <div class="stats">
                 <div class="stat">
@@ -29,7 +36,13 @@
                     <span class="stat-label">Par seconde</span>
                     <span id="per-second" class="stat-value">0</span>
                 </div>
+                <div class="stat">
+                    <span class="stat-label">Boutures</span>
+                    <span id="cuttings" class="stat-value">0</span>
+                </div>
             </div>
+
+            <div id="buff-bar" class="buff-bar" hidden></div>
 
             <button type="button" id="tree-btn" class="tree-btn" aria-label="Cueillir une pomme">
                 <svg class="tree-svg" viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -39,7 +52,6 @@
                     <circle cx="68" cy="100" r="36" fill="#4a9634"/>
                     <circle cx="132" cy="100" r="36" fill="#4a9634"/>
                     <circle cx="100" cy="72" r="40" fill="#5aad3f"/>
-                    <!-- pommes -->
                     <circle cx="72" cy="108" r="9" fill="#c0392b"/>
                     <ellipse cx="72" cy="100" rx="2" ry="3" fill="#2d5a1e"/>
                     <circle cx="118" cy="95" r="8" fill="#e74c3c"/>
