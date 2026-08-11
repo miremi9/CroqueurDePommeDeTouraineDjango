@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-5 text-center">
+    <h1 class="display-4 mb-3">404</h1>
+    <p class="mb-4">La page que vous recherchez n'existe pas.</p>
+
+    <figure class="mystery-tree mx-auto mb-4">
+        <button type="button" id="mystery-tree" class="mystery-tree-btn" aria-label="Un pommier mystérieux">
+            <svg viewBox="0 0 200 240" xmlns="http://www.w3.org/2000/svg" width="160" height="192" aria-hidden="true">
+                <ellipse cx="100" cy="220" rx="48" ry="10" fill="rgba(0,0,0,0.12)"/>
+                <rect x="90" y="150" width="20" height="70" rx="4" fill="#6b4423"/>
+                <circle cx="100" cy="120" r="58" fill="#3d7a2a"/>
+                <circle cx="68" cy="100" r="36" fill="#4a9634"/>
+                <circle cx="132" cy="100" r="36" fill="#4a9634"/>
+                <circle cx="100" cy="72" r="40" fill="#5aad3f"/>
+                <circle cx="72" cy="108" r="9" fill="#c0392b"/>
+                <ellipse cx="72" cy="100" rx="2" ry="3" fill="#2d5a1e"/>
+                <circle cx="118" cy="95" r="8" fill="#e74c3c"/>
+                <ellipse cx="118" cy="88" rx="2" ry="3" fill="#2d5a1e"/>
+                <circle cx="95" cy="78" r="7" fill="#d63031"/>
+                <ellipse cx="95" cy="72" rx="1.5" ry="2.5" fill="#2d5a1e"/>
+            </svg>
+        </button>
+        <figcaption class="text-muted small mt-2">Hmm… ce pommier a l'air curieux.</figcaption>
+    </figure>
+
+    <a href="{% url 'forum:index' %}" class="btn btn-success">Retour à l'accueil</a>
+</div>
+
+<style>
+    .mystery-tree-btn {
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: transform 0.12s ease, filter 0.2s ease;
+    }
+    .mystery-tree-btn:hover {
+        filter: drop-shadow(0 6px 14px rgba(192, 57, 43, 0.4));
+    }
+    .mystery-tree-btn:active,
+    .mystery-tree-btn.is-shake {
+        transform: scale(0.94) rotate(-2deg);
+    }
+</style>
+
+<script>
+(function () {
+    const btn = document.getElementById("mystery-tree");
+    if (!btn) return;
+    let clicks = 0;
+    const NEED = 3;
+    btn.addEventListener("click", function () {
+        clicks += 1;
+        btn.classList.add("is-shake");
+        setTimeout(function () { btn.classList.remove("is-shake"); }, 120);
+        if (clicks >= NEED) {
+            window.location.href = "{% url 'minigame:game' %}";
+        }
+    });
+})();
+</script>
+{% endblock %}

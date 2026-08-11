@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verger Infini</title>
+    <link rel="stylesheet" href="{% static 'minigame/css/game.css' %}">
+</head>
+<body>
+    <div class="game">
+        <header class="game-header">
+            <a class="back-link" href="{% url 'forum:index' %}">← Retour au site</a>
+            <h1 class="brand">Verger Infini</h1>
+            <p class="tagline">Récolte des pommes et pose des boutures sur ton pommier pour démultiplier ses bonus.</p>
+        </header>
+
+        <aside id="tools-panel" class="tools-panel" aria-label="Outils du verger" hidden>
+            <div class="panel-header">
+                <h2>Outils</h2>
+            </div>
+            <ul id="tools-list" class="tools-list"></ul>
+        </aside>
+
+        <section class="play-area" aria-label="Zone de jeu">
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-label">Pommes</span>
+                    <span id="apples" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Par clic</span>
+                    <span id="per-click" class="stat-value">1</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Par seconde</span>
+                    <span id="per-second" class="stat-value">0</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Boutures</span>
+                    <span id="cuttings" class="stat-value">0</span>
+                </div>
+                <div class="stat" id="attrait-stat" hidden>
+                    <span class="stat-label">Attrait</span>
+                    <span id="attrait" class="stat-value">0</span>
+                </div>
+                <div class="stat" id="attrait-per-second-stat" hidden>
+                    <span class="stat-label">Attrait / s</span>
+                    <span id="attrait-per-second" class="stat-value">0</span>
+                </div>
+            </div>
+
+            <div id="buff-bar" class="buff-bar" hidden></div>
+            <p id="bouture-hint" class="bouture-hint" hidden></p>
+            <div id="tree-zone" class="tree-zone" aria-label="Verger"></div>
+            <template id="tree-template">
+                {% include "minigame/tree.html" %}
+            </template>
+            <span class="click-hint">Cueillir !</span>
+            <div id="floating-layer" class="floating-layer" aria-hidden="true"></div>
+        </section>
+
+        <aside class="shop" aria-label="Boutique du verger">
+            <div class="shop-header">
+                <h2>Boutique</h2>
+                <button type="button" id="reset-btn" class="reset-btn" title="Réinitialiser la sauvegarde">Reset</button>
+            </div>
+            <div class="shop-tabs" role="tablist">
+                <button type="button" id="shop-tab-apples" class="shop-tab is-active" role="tab" aria-selected="true">🍎 Boutique</button>
+                <button type="button" id="shop-tab-attrait" class="shop-tab" role="tab" aria-selected="false" hidden>✨ Attrait</button>
+            </div>
+            <ul id="shop-list" class="shop-list" role="tabpanel"></ul>
+            <ul id="attrait-shop-list" class="shop-list" role="tabpanel" hidden></ul>
+        </aside>
+    </div>
+
+    <script type="module" src="{% static 'minigame/js/game.js' %}"></script>
+</body>
+</html>

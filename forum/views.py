@@ -163,3 +163,7 @@ def article_toggle_pin_main_page(request, id):
         "forum/article/_main_page_button.html",
         {"post": article},
     )
+
+
+def custom_404(request, exception):
+    return render(request, "404.html", status=404)
