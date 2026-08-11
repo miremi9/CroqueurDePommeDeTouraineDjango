@@ -12,6 +12,8 @@ import {
     state,
     getOwned,
     costOf,
+    currencyOf,
+    resourceAmount,
     isUpgradeAvailable,
     isToolUnlocked,
     isBoutureTypeUnlocked,
@@ -21,17 +23,28 @@ import {
     treeCuttingsTotal,
     perClick,
     perSecond,
+    attraitUnlocked,
+    attraitPerSecond,
 } from "./state.js";
 import { formatNumber } from "./utils.js";
+
+const CURRENCY_ICON = { apples: "🍎", attrait: "✨" };
 
 export const els = {
     apples: document.getElementById("apples"),
     perClick: document.getElementById("per-click"),
     perSecond: document.getElementById("per-second"),
     cuttings: document.getElementById("cuttings"),
+    attraitStat: document.getElementById("attrait-stat"),
+    attrait: document.getElementById("attrait"),
+    attraitPerSecondStat: document.getElementById("attrait-per-second-stat"),
+    attraitPerSecond: document.getElementById("attrait-per-second"),
     treeZone: document.getElementById("tree-zone"),
     boutureHint: document.getElementById("bouture-hint"),
     shopList: document.getElementById("shop-list"),
+    shopTabApples: document.getElementById("shop-tab-apples"),
+    shopTabAttrait: document.getElementById("shop-tab-attrait"),
+    attraitShopList: document.getElementById("attrait-shop-list"),
     toolsList: document.getElementById("tools-list"),
     toolsPanel: document.getElementById("tools-panel"),
     buffBar: document.getElementById("buff-bar"),
@@ -39,6 +52,21 @@ export const els = {
     resetBtn: document.getElementById("reset-btn"),
     gameRoot: document.querySelector(".game"),
 };
+
+let activeShopTab = "apples";
+
+function setShopTab(tab) {
+    activeShopTab = tab;
+    els.shopList.hidden = tab !== "apples";
+    els.attraitShopList.hidden = tab !== "attrait";
+    els.shopTabApples.classList.toggle("is-active", tab === "apples");
+    els.shopTabApples.setAttribute("aria-selected", String(tab === "apples"));
+    els.shopTabAttrait.classList.toggle("is-active", tab === "attrait");
+    els.shopTabAttrait.setAttribute("aria-selected", String(tab === "attrait"));
+}
+
+els.shopTabApples.addEventListener("click", () => setShopTab("apples"));
+els.shopTabAttrait.addEventListener("click", () => setShopTab("attrait"));
 
 export function spawnFloat(amount, clientX, clientY) {
     const rect = els.floating.getBoundingClientRect();
@@ -74,9 +102,16 @@ export function renderStats() {
     els.apples.textContent = formatNumber(state.apples);
     els.perClick.textContent = formatNumber(perClick());
     els.perSecond.textContent = formatNumber(perSecond());
-    els.cuttings.textContent = String(
-        state.trees.reduce((sum, tree) => sum + treeCuttingsTotal(tree), 0),
-    );
+    els.cuttings.textContent = String(treeCuttingsTotal());
+
+    const attrait = attraitUnlocked();
+    els.attraitStat.hidden = !attrait;
+    els.attraitPerSecondStat.hidden = !attrait;
+    if (attrait) {
+        els.attrait.textContent = formatNumber(state.attrait);
+        els.attraitPerSecond.textContent = formatNumber(attraitPerSecond());
+    }
+
     renderBuffs();
 }
 
@@ -87,7 +122,7 @@ export function renderBoutureTargeting(armedType) {
     if (armedType) {
         els.boutureHint.hidden = false;
         els.boutureHint.textContent =
-            `Cliquez sur un pommier pour poser une ${armedType.name} (${armedType.applyCost} 🍎)`;
+            `Cliquez sur le pommier pour poser une ${armedType.name} (${armedType.applyCost} 🍎)`;
     } else {
         els.boutureHint.hidden = true;
         els.boutureHint.textContent = "";
@@ -95,17 +130,21 @@ export function renderBoutureTargeting(armedType) {
 }
 
 function toolRowState(tool) {
+    if (tool.appleCost && state.apples < tool.appleCost) {
+        return { disabled: true, label: `Pas assez (${tool.appleCost} 🍎)`, meta: "Prêt" };
+    }
     const left = cooldownLeft(tool.id);
     if (left > 0) {
         return { disabled: true, label: `Cooldown ${Math.ceil(left / 1000)}s`, meta: "En recharge…" };
     }
-    return { disabled: false, label: tool.actionLabel, meta: `Cooldown : ${tool.cooldownSec}s` };
+    const label = tool.appleCost ? `${tool.actionLabel} — ${tool.appleCost} 🍎` : tool.actionLabel;
+    return { disabled: false, label, meta: `Cooldown : ${tool.cooldownSec}s` };
 }
 
 function boutureRowState(type, armed) {
     const left = cooldownLeft(`bouture_${type.id}`);
     if (armed) {
-        return { disabled: false, label: "Annuler", meta: "Cliquez sur un pommier…" };
+        return { disabled: false, label: "Annuler", meta: "Cliquez sur le pommier…" };
     }
     if (state.apples < type.applyCost) {
         return { disabled: true, label: `Pas assez (${type.applyCost} 🍎)`, meta: "Prêt" };
@@ -210,38 +249,39 @@ export function renderTools(onUseTool, onArmBouture, armedTypeId) {
     refreshToolRows(armedTypeId);
 }
 
-/** @param {(upgradeId: string) => void} onBuy */
-export function renderShop(onBuy) {
-    const availableIds = new Set(UPGRADES.filter(isUpgradeAvailable).map((u) => u.id));
-    const existing = new Set(
-        [...els.shopList.querySelectorAll("[data-id]")].map((el) => el.dataset.id),
-    );
+/** Upgrades for one currency, in catalog order. */
+function upgradesFor(currency) {
+    return UPGRADES.filter((u) => currencyOf(u) === currency);
+}
+
+function renderShopSection(currency, listEl) {
+    const availableIds = new Set(upgradesFor(currency).filter(isUpgradeAvailable).map((u) => u.id));
+    const existing = new Set([...listEl.querySelectorAll("[data-id]")].map((el) => el.dataset.id));
 
     const same =
         availableIds.size === existing.size &&
         [...availableIds].every((id) => existing.has(id));
-    if (!same) {
-        buildShop(onBuy);
-        return;
-    }
+    if (!same) return false;
 
-    for (const u of UPGRADES) {
+    for (const u of upgradesFor(currency)) {
         if (!availableIds.has(u.id)) continue;
-        const row = els.shopList.querySelector(`[data-id="${u.id}"]`);
+        const row = listEl.querySelector(`[data-id="${u.id}"]`);
         if (!row) continue;
         const owned = getOwned(u.id);
         const cost = costOf(u);
         const maxLabel = u.nb_max != null ? ` / ${u.nb_max}` : "";
         row.querySelector(".owned-count").textContent = String(owned) + maxLabel;
         row.querySelector(".price").textContent = formatNumber(cost);
-        row.querySelector(".buy-btn").disabled = state.apples < cost;
+        row.querySelector(".buy-btn").disabled = resourceAmount(currency) < cost;
     }
+    return true;
 }
 
 /** @param {(upgradeId: string) => void} onBuy */
-export function buildShop(onBuy) {
-    els.shopList.innerHTML = "";
-    for (const u of UPGRADES) {
+function buildShopSection(onBuy, currency, listEl) {
+    const icon = CURRENCY_ICON[currency];
+    listEl.innerHTML = "";
+    for (const u of upgradesFor(currency)) {
         if (!isUpgradeAvailable(u)) continue;
         const li = document.createElement("li");
         li.className = "shop-item";
@@ -252,59 +292,76 @@ export function buildShop(onBuy) {
             <span class="shop-item-meta">×<span class="owned-count">0${maxLabel}</span></span>
             <p class="shop-item-desc">${u.desc}</p>
             <button type="button" class="buy-btn">
-                Acheter — <span class="price">0</span> 🍎
+                Acheter — <span class="price">0</span> ${icon}
             </button>
         `;
         li.querySelector(".buy-btn").addEventListener("click", () => onBuy(u.id));
-        els.shopList.appendChild(li);
+        listEl.appendChild(li);
 
         const owned = getOwned(u.id);
         const cost = costOf(u);
         li.querySelector(".owned-count").textContent = String(owned) + maxLabel;
         li.querySelector(".price").textContent = formatNumber(cost);
-        li.querySelector(".buy-btn").disabled = state.apples < cost;
+        li.querySelector(".buy-btn").disabled = resourceAmount(currency) < cost;
     }
 }
 
-/** Renders one tree button into the orchard; no-op if it already exists. */
-export function renderTree(treeId) {
-    if (document.getElementById(`tree-btn_${treeId}`)) return;
+function refreshAttraitTab() {
+    const unlocked = attraitUnlocked();
+    els.shopTabAttrait.hidden = !unlocked;
+    if (!unlocked && activeShopTab === "attrait") setShopTab("apples");
+}
+
+/** @param {(upgradeId: string) => void} onBuy */
+export function renderShop(onBuy) {
+    if (!renderShopSection("apples", els.shopList)) buildShopSection(onBuy, "apples", els.shopList);
+    if (!renderShopSection("attrait", els.attraitShopList)) {
+        buildShopSection(onBuy, "attrait", els.attraitShopList);
+    }
+    refreshAttraitTab();
+}
+
+/** @param {(upgradeId: string) => void} onBuy */
+export function buildShop(onBuy) {
+    buildShopSection(onBuy, "apples", els.shopList);
+    buildShopSection(onBuy, "attrait", els.attraitShopList);
+    refreshAttraitTab();
+}
+
+/** Renders the (single) tree button into the orchard; no-op if it already exists. */
+export function renderTree() {
+    if (document.getElementById("tree-btn")) return;
 
     const template = document.getElementById("tree-template");
     const button = document.createElement("button");
     button.type = "button";
-    button.id = `tree-btn_${treeId}`;
+    button.id = "tree-btn";
     button.className = "tree-btn";
-    button.dataset.treeId = treeId;
     button.setAttribute("aria-label", "Cueillir une pomme");
     button.appendChild(template.content.cloneNode(true));
 
     els.treeZone.appendChild(button);
 }
 
-/** Reflects each tree's cutting count as a small badge on its button. */
+/** Reflects the tree's cutting count as a small badge on its button. */
 export function updateTreeBadges() {
-    for (const tree of state.trees) {
-        const btn = document.getElementById(`tree-btn_${tree.id}`);
-        if (!btn) continue;
-        const total = treeCuttingsTotal(tree);
-        let badge = btn.querySelector(".tree-badge");
-        if (total <= 0) {
-            if (badge) badge.remove();
-            continue;
-        }
-        if (!badge) {
-            badge = document.createElement("span");
-            badge.className = "tree-badge";
-            btn.appendChild(badge);
-        }
-        badge.textContent = `🌱 ${total}`;
+    const btn = document.getElementById("tree-btn");
+    if (!btn) return;
+    const total = treeCuttingsTotal();
+    let badge = btn.querySelector(".tree-badge");
+    if (total <= 0) {
+        if (badge) badge.remove();
+        return;
     }
+    if (!badge) {
+        badge = document.createElement("span");
+        badge.className = "tree-badge";
+        btn.appendChild(badge);
+    }
+    badge.textContent = `🌱 ${total}`;
 }
 
 export function renderVerger() {
-    for (const tree of state.trees) {
-        renderTree(tree.id);
-    }
+    renderTree();
     updateTreeBadges();
 }

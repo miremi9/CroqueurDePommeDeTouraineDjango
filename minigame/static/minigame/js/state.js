@@ -5,21 +5,29 @@
  * derived from it (costs, production rates, availability...).
  */
 
-import { STORAGE_KEY, UPGRADES, BOUTURE_TYPES, TREE_MULTIPLIER_PER_CUTTING } from "./config.js";
+import {
+    STORAGE_KEY,
+    UPGRADES,
+    BOUTURE_TYPES,
+    ATTRAIT_UNLOCK_STAGE,
+    ATTRAIT_BASE_PER_SECOND,
+    ATTRAIT_PRODUCTION_BONUS_PER_ATTRAIT,
+} from "./config.js";
 
-const BOUTURE_BY_ID = new Map(BOUTURE_TYPES.map((t) => [t.id, t]));
-
-/** @typedef {{ id: string, cuttings: Record<string, number> }} Tree */
+/** @typedef {{ cuttings: Record<string, number> }} Tree */
 
 export const state = {
     apples: 0,
+    /** People's interest in the orchard, unlocked once stage reaches ATTRAIT_UNLOCK_STAGE. */
+    attrait: 0,
     stage: 0,
     owned: {},
-    /** @type {Tree[]} */
-    trees: [{ id: "base", cuttings: {} }],
+    /** The single tree in the orchard, holding every posed bouture (cutting), by type id. @type {Tree} */
+    tree: { cuttings: {} },
     tools: {
         arroser: false,
         engrais: false,
+        visite_verger: false,
     },
     /** @type {Record<string, boolean>} unlocked bouture types, keyed by BOUTURE_TYPES id */
     boutureTypes: Object.fromEntries(BOUTURE_TYPES.map((t) => [t.id, false])),
@@ -27,6 +35,7 @@ export const state = {
     toolReadyAt: {
         arroser: 0,
         engrais: 0,
+        visite_verger: 0,
         ...Object.fromEntries(BOUTURE_TYPES.map((t) => [`bouture_${t.id}`, 0])),
     },
     /** buff expiry timestamps (ms) */
@@ -53,7 +62,17 @@ export function isUpgradeAvailable(upgrade) {
 
 export function costOf(upgrade) {
     const owned = getOwned(upgrade.id);
-    return Math.floor(upgrade.baseCost * Math.pow(upgrade.costGrowth, owned));
+    const raw = upgrade.baseCost * Math.pow(upgrade.costGrowth, owned);
+    return Math.max(1, Math.floor(raw * boutureMultiplier("shop")));
+}
+
+/** Which resource an upgrade is priced in: "apples" (default) or "attrait". */
+export function currencyOf(upgrade) {
+    return upgrade.currency === "attrait" ? "attrait" : "apples";
+}
+
+export function resourceAmount(currency) {
+    return currency === "attrait" ? state.attrait : state.apples;
 }
 
 export function isToolUnlocked(toolId) {
@@ -68,23 +87,44 @@ export function cooldownLeft(key) {
     return Math.max(0, (state.toolReadyAt[key] || 0) - Date.now());
 }
 
-export function findTree(treeId) {
-    return state.trees.find((t) => t.id === treeId);
+export function attraitUnlocked() {
+    return state.stage >= ATTRAIT_UNLOCK_STAGE;
 }
 
-/** Total number of cuttings (any type) posed on a given tree. */
-export function treeCuttingsTotal(tree) {
-    return Object.values(tree.cuttings).reduce((sum, n) => sum + n, 0);
+/** Attrait/s from the ambient base rate + every owned attraitCps upgrade. */
+export function attraitPerSecond() {
+    if (!attraitUnlocked()) return 0;
+    let value = ATTRAIT_BASE_PER_SECOND;
+    for (const u of UPGRADES) {
+        if (u.attraitCps) value += u.attraitCps * getOwned(u.id);
+    }
+    return value;
 }
 
-/** Extra global CPS multiplier contributed by a tree, from its own cutting count. */
-function treeMultiplierContribution(tree) {
-    return treeCuttingsTotal(tree) * TREE_MULTIPLIER_PER_CUTTING;
+/** perSecond() multiplier from accumulated attrait: 1 + 0.2 * attrait. */
+export function attraitProductionMultiplier() {
+    return 1 + ATTRAIT_PRODUCTION_BONUS_PER_ATTRAIT * state.attrait;
 }
 
-/** 1 + sum of every tree's multiplier contribution — the more cuttings piled on a tree, the bigger the bonus. */
-export function globalTreeMultiplier() {
-    return 1 + state.trees.reduce((sum, tree) => sum + treeMultiplierContribution(tree), 0);
+/** Total number of cuttings (any type) posed on the tree. */
+export function treeCuttingsTotal() {
+    return Object.values(state.tree.cuttings).reduce((sum, n) => sum + n, 0);
+}
+
+/**
+ * Combined multiplier fed by every posed bouture of the given `kind`. Each
+ * type compounds with itself (factorPerCutting ** count — cumulable AND
+ * self-multiplying), and distinct types of the same kind stack by
+ * multiplying together.
+ */
+export function boutureMultiplier(kind) {
+    let mult = 1;
+    for (const type of BOUTURE_TYPES) {
+        if (type.kind !== kind) continue;
+        const count = state.tree.cuttings[type.id] || 0;
+        if (count > 0) mult *= Math.pow(type.factorPerCutting, count);
+    }
+    return mult;
 }
 
 export function basePerClick() {
@@ -97,18 +137,12 @@ export function basePerClick() {
     return value;
 }
 
-/** CPS from purchased varieties + all posed cuttings, before the tree multiplier and buffs. */
+/** CPS from purchased varieties, before bouture multipliers and buffs. */
 export function basePerSecond() {
     let value = 0;
     for (const u of UPGRADES) {
         if (u.cps) {
             value += u.cps * getOwned(u.id);
-        }
-    }
-    for (const tree of state.trees) {
-        for (const [typeId, count] of Object.entries(tree.cuttings)) {
-            const type = BOUTURE_BY_ID.get(typeId);
-            if (type) value += count * type.cpsPerCutting;
         }
     }
     return value;
@@ -123,23 +157,28 @@ export function fertilizerActive() {
 }
 
 export function perClick() {
-    let value = basePerClick();
-    if (waterActive()) value *= 2;
+    let value = basePerClick() * boutureMultiplier("click") * boutureMultiplier("baseValue");
+    if (waterActive()) value *= 2 * boutureMultiplier("buff");
     return value;
 }
 
 export function perSecond() {
-    let value = basePerSecond() * globalTreeMultiplier();
-    if (fertilizerActive()) value *= 2;
+    let value =
+        basePerSecond() *
+        boutureMultiplier("production") *
+        boutureMultiplier("baseValue") *
+        attraitProductionMultiplier();
+    if (fertilizerActive()) value *= 2 * boutureMultiplier("buff");
     return value;
 }
 
 export function save() {
     const payload = {
         apples: state.apples,
+        attrait: state.attrait,
         stage: state.stage,
         owned: state.owned,
-        trees: state.trees,
+        tree: state.tree,
         tools: state.tools,
         boutureTypes: state.boutureTypes,
         toolReadyAt: state.toolReadyAt,
@@ -162,16 +201,14 @@ export function load() {
         if (typeof data.apples === "number" && data.apples >= 0) {
             state.apples = data.apples;
         }
+        if (typeof data.attrait === "number" && data.attrait >= 0) {
+            state.attrait = data.attrait;
+        }
         if (typeof data.stage === "number" && data.stage >= 0) {
             state.stage = Math.floor(data.stage);
         }
-        if (Array.isArray(data.trees) && data.trees.length > 0) {
-            state.trees = data.trees
-                .filter((t) => t && typeof t.id === "string")
-                .map((t) => ({
-                    id: t.id,
-                    cuttings: t.cuttings && typeof t.cuttings === "object" ? { ...t.cuttings } : {},
-                }));
+        if (data.tree && typeof data.tree === "object" && typeof data.tree.cuttings === "object") {
+            state.tree = { cuttings: { ...data.tree.cuttings } };
         }
         if (data.tools && typeof data.tools === "object") {
             for (const id of Object.keys(state.tools)) {
@@ -206,14 +243,17 @@ export function load() {
         // Sync unlocks from owned shop items, in case onBuy was missed.
         if (getOwned("outil_arrosoir") > 0) state.tools.arroser = true;
         if (getOwned("outil_engrais") > 0) state.tools.engrais = true;
+        if (getOwned("outil_visite") > 0) state.tools.visite_verger = true;
         for (const t of BOUTURE_TYPES) {
             if (getOwned(`bouture_${t.id}`) > 0) state.boutureTypes[t.id] = true;
         }
 
         if (typeof data.savedAt === "number") {
-            const elapsedSec = Math.max(0, (Date.now() - data.savedAt) / 1000);
-            const offlineGain = Math.min(elapsedSec, 8 * 3600) * perSecond();
-            state.apples += offlineGain;
+            const elapsedSec = Math.min(Math.max(0, (Date.now() - data.savedAt) / 1000), 8 * 3600);
+            state.apples += elapsedSec * perSecond();
+            if (attraitUnlocked()) {
+                state.attrait += elapsedSec * attraitPerSecond();
+            }
         }
     } catch (_) {
         /* corrupt save — start fresh rather than crash */

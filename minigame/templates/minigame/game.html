@@ -12,7 +12,7 @@
         <header class="game-header">
             <a class="back-link" href="{% url 'forum:index' %}">← Retour au site</a>
             <h1 class="brand">Verger Infini</h1>
-            <p class="tagline">Récolte des pommes, plante des variétés, élargis ton verger.</p>
+            <p class="tagline">Récolte des pommes et pose des boutures sur ton pommier pour démultiplier ses bonus.</p>
         </header>
 
         <aside id="tools-panel" class="tools-panel" aria-label="Outils du verger" hidden>
@@ -40,6 +40,14 @@
                     <span class="stat-label">Boutures</span>
                     <span id="cuttings" class="stat-value">0</span>
                 </div>
+                <div class="stat" id="attrait-stat" hidden>
+                    <span class="stat-label">Attrait</span>
+                    <span id="attrait" class="stat-value">0</span>
+                </div>
+                <div class="stat" id="attrait-per-second-stat" hidden>
+                    <span class="stat-label">Attrait / s</span>
+                    <span id="attrait-per-second" class="stat-value">0</span>
+                </div>
             </div>
 
             <div id="buff-bar" class="buff-bar" hidden></div>
@@ -57,7 +65,12 @@
                 <h2>Boutique</h2>
                 <button type="button" id="reset-btn" class="reset-btn" title="Réinitialiser la sauvegarde">Reset</button>
             </div>
-            <ul id="shop-list" class="shop-list"></ul>
+            <div class="shop-tabs" role="tablist">
+                <button type="button" id="shop-tab-apples" class="shop-tab is-active" role="tab" aria-selected="true">🍎 Boutique</button>
+                <button type="button" id="shop-tab-attrait" class="shop-tab" role="tab" aria-selected="false" hidden>✨ Attrait</button>
+            </div>
+            <ul id="shop-list" class="shop-list" role="tabpanel"></ul>
+            <ul id="attrait-shop-list" class="shop-list" role="tabpanel" hidden></ul>
         </aside>
     </div>
 

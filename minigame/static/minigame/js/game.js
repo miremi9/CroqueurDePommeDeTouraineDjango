@@ -13,12 +13,15 @@ import {
     getOwned,
     isUpgradeAvailable,
     costOf,
+    currencyOf,
+    resourceAmount,
     isToolUnlocked,
     isBoutureTypeUnlocked,
     cooldownLeft,
-    findTree,
     perClick,
     perSecond,
+    attraitUnlocked,
+    attraitPerSecond,
     save,
     load,
 } from "./state.js";
@@ -48,9 +51,14 @@ function buy(id) {
     const upgrade = UPGRADES.find((u) => u.id === id);
     if (!upgrade || !isUpgradeAvailable(upgrade)) return;
     const cost = costOf(upgrade);
-    if (state.apples < cost) return;
+    const currency = currencyOf(upgrade);
+    if (resourceAmount(currency) < cost) return;
 
-    state.apples -= cost;
+    if (currency === "attrait") {
+        state.attrait -= cost;
+    } else {
+        state.apples -= cost;
+    }
     state.owned[id] = getOwned(id) + 1;
     callUpgradeEffect(upgrade);
 
@@ -71,6 +79,11 @@ function useTool(toolId) {
     } else if (toolId === "engrais") {
         state.fertilizerUntil = Date.now() + 20_000;
         state.toolReadyAt.engrais = Date.now() + tool.cooldownSec * 1000;
+    } else if (toolId === "visite_verger") {
+        if (state.apples < tool.appleCost) return;
+        state.apples -= tool.appleCost;
+        state.attrait += tool.attraitGain;
+        state.toolReadyAt.visite_verger = Date.now() + tool.cooldownSec * 1000;
     }
 
     save();
@@ -90,18 +103,15 @@ function armBouture(typeId) {
     renderBoutureTargeting(armedBouture);
 }
 
-/** Spends apples to pose the armed bouture type on the given tree. */
-function poseBouture(treeId) {
+/** Spends apples to pose the armed bouture type on the tree. */
+function poseBouture() {
     const type = armedBouture;
     if (!type) return;
     if (cooldownLeft(`bouture_${type.id}`) > 0) return;
     if (state.apples < type.applyCost) return;
 
-    const tree = findTree(treeId);
-    if (!tree) return;
-
     state.apples -= type.applyCost;
-    tree.cuttings[type.id] = (tree.cuttings[type.id] || 0) + 1;
+    state.tree.cuttings[type.id] = (state.tree.cuttings[type.id] || 0) + 1;
     state.toolReadyAt[`bouture_${type.id}`] = Date.now() + type.cooldownSec * 1000;
 
     armedBouture = null;
@@ -121,7 +131,7 @@ function pickApple(event) {
     if (!btn) return;
 
     if (armedBouture) {
-        poseBouture(btn.dataset.treeId);
+        poseBouture();
         return;
     }
 
@@ -149,6 +159,9 @@ function tick() {
     if (cps > 0 && dt > 0) {
         state.apples += cps * dt;
     }
+    if (attraitUnlocked() && dt > 0) {
+        state.attrait += attraitPerSecond() * dt;
+    }
     renderStats();
     renderShop(buy);
     refreshTools();
@@ -157,8 +170,9 @@ function tick() {
 function reset() {
     if (!window.confirm("Réinitialiser tout le verger ?")) return;
     state.apples = 0;
+    state.attrait = 0;
     state.stage = 0;
-    state.trees = [{ id: "base", cuttings: {} }];
+    state.tree = { cuttings: {} };
     state.waterUntil = 0;
     state.fertilizerUntil = 0;
     for (const u of UPGRADES) {

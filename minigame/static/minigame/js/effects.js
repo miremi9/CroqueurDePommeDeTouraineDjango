@@ -6,7 +6,6 @@
  */
 
 import { state } from "./state.js";
-import { renderTree } from "./ui.js";
 
 /** @type {Record<string, (upgrade: import("./config.js").UpgradeDef) => void>} */
 export const EFFECTS = {
@@ -28,14 +27,12 @@ export const EFFECTS = {
     unlockEngrais() {
         state.tools.engrais = true;
     },
+    unlockVisite() {
+        state.tools.visite_verger = true;
+    },
     /** @param {import("./config.js").UpgradeDef} upgrade */
     unlockBoutureType(upgrade) {
         state.boutureTypes[upgrade.boutureType] = true;
-    },
-    addTree() {
-        const treeId = `base_${state.trees.length + 1}`;
-        state.trees.push({ id: treeId, cuttings: {} });
-        renderTree(treeId);
     },
 };
 
