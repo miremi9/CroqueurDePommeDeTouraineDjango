@@ -6,6 +6,7 @@ from solo.models import SingletonModel
 class SiteBody(SingletonModel):
     title = models.CharField(max_length=100)
     logo = models.ImageField(null=True, blank=True)
+    logo2 = models.ImageField(null=True, blank=True)
     background_image = models.ImageField(null=True, blank=True)
     bas_de_page = models.TextField()
 
