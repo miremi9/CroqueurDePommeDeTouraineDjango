@@ -35,7 +35,7 @@ SiteBodyUpdateView = formview_factory(
     form=SiteBodyForm,
     cancel_url=reverse_lazy("forum:index"),
     my_success_url="/",
-    can_access_function=lambda request: request.user.is_staff,
+    can_access_function=authorisations.is_admin,
     instance=lambda: SiteBody.get_solo()
 )
 
