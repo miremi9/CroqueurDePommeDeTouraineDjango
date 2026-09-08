@@ -14,6 +14,32 @@ from forum.forms import ArticleForm
 from forum.models import Section, Article
 
 
+def get_section_posts(section_id: int) -> QuerySet[Article]:
+    return (Article.objects
+            .filter(section_id=section_id)
+            .annotate(
+        pin_order=Case(
+            When(pinned_on_top=True, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField()
+        )
+    )
+            .order_by("pin_order", "created_at")
+            )
+
+
+def build_section_context(section, user):
+    posts = get_section_posts(section.pk)
+    for post in posts:
+        post.edit_form = ArticleForm(instance=post, prefix=f"article_{post.id}")
+    return {
+        "section": section,
+        "posts": posts,
+        "can_post": tools.authorisations.can_post(user, section),
+        "article_form": ArticleForm(),
+    }
+
+
 class ArticleBaseView(UserPassesTestMixin):
     model = Article
     form_class = ArticleForm
@@ -41,6 +67,12 @@ class ArticleCreateView(ArticleBaseView, CreateView):
         form.instance.author = self.request.user
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        context = build_section_context(self.get_section(), self.request.user)
+        context["article_form"] = form
+        context["open_modal_id"] = "createModal"
+        return render(self.request, "forum/section.html", context)
+
 
 class ArticleUpdateView(ArticleBaseView, UpdateView):
     pk_url_kwarg = "id"
@@ -53,6 +85,15 @@ class ArticleUpdateView(ArticleBaseView, UpdateView):
     def get_success_url(self):
         messages.info(self.request, "Article modifié avec succès.")
         return reverse('forum:section_detail', kwargs={'slug': self.object.section.slug})
+
+    def form_invalid(self, form):
+        context = build_section_context(self.get_section(), self.request.user)
+        for post in context["posts"]:
+            if post.pk == self.object.pk:
+                post.edit_form = form
+                break
+        context["open_modal_id"] = f"updateModal{self.object.id}"
+        return render(self.request, "forum/section.html", context)
 
 
 class ArticleDeleteView(ArticleBaseView, DeleteView):
@@ -76,28 +117,9 @@ class SectionDetailView(UserPassesTestMixin, DetailView):
         section = self.get_object()
         return tools.authorisations.can_read(self.request.user, section)
 
-    def get_posts(self, section_id: int) -> QuerySet[Article]:
-        return (Article.objects
-                .filter(section_id=section_id)
-                .annotate(
-            pin_order=Case(
-                When(pinned_on_top=True, then=Value(0)),
-                default=Value(1),
-                output_field=IntegerField()
-            )
-        )
-                .order_by("pin_order", "created_at")
-                )
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        section = self.object
-
-        context['posts'] = self.get_posts(section.pk)
-        for post in context['posts']:
-            post.edit_form = ArticleForm(instance=post, prefix=f"article_{post.id}")
-        context['can_post'] = tools.authorisations.can_post(self.request.user, section)
-        context['article_form'] = ArticleForm()
+        context.update(build_section_context(self.object, self.request.user))
         return context
 
 

@@ -22,7 +22,7 @@ class User(AbstractUser):
     SEARCH_FIELDS = ("username", "email")
     username_validator = SpaceAllowedUsernameValidator()
     username = models.CharField(
-        _("username"),
+        _("Nom d'utilisateur"),
         max_length=150,
         unique=True,
         help_text=_(
@@ -33,6 +33,7 @@ class User(AbstractUser):
             "unique": _("A user with that username already exists."),
         },
     )
+    password = models.CharField(_("Mot de passe"), max_length=128)
     email = models.EmailField(unique=True)
     profile_picture = models.ImageField(upload_to='uploads/',
                                         null=True,

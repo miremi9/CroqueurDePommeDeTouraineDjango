@@ -77,7 +77,8 @@ class SiteBodyForm(FormMixin, forms.ModelForm):
             "title",
             "background_image",
             "bas_de_page",
-            "logo"
+            "logo",
+            "logo2"
         ]
 
     def __init__(self, *args, **kwargs):
@@ -89,6 +90,7 @@ class SiteBodyForm(FormMixin, forms.ModelForm):
             Field("title"),
             Field("background_image"),
             Field("logo"),
+            Field("logo2"),
             Field("bas_de_page"),
         )
 
