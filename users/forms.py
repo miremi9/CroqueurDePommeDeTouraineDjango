@@ -1,23 +1,31 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm
+from django.contrib.auth.forms import PasswordChangeForm, AuthenticationForm, SetPasswordForm
 from django.contrib.auth.password_validation import validate_password
+from django.utils.safestring import mark_safe
 
 import tools.authorisations
 from tools.forms import FormMixin
 from .models import User
+
+PASSWORD_HELP_TEXT = mark_safe(
+    "Le mot de passe doit respecter les règles suivantes :"
+    "<ul class='mb-0 ps-3'>"
+    "<li>contenir au moins 8 caractères ;</li>"
+    "<li>ne pas être trop similaire à vos informations personnelles "
+    "(nom d'utilisateur, email, etc.) ;</li>"
+    "<li>ne pas être un mot de passe trop courant ;</li>"
+    "<li>ne pas être uniquement composé de chiffres.</li>"
+    "</ul>"
+)
 
 
 class RegisterForm(forms.ModelForm):
     password1 = forms.CharField(
         label="Mot de passe",
         widget=forms.PasswordInput,
-        help_text=(
-            "Le mot de passe doit contenir au moins 8 caractères, "
-            "ne pas être trop similaire à vos informations personnelles, "
-            "ne pas être un mot de passe courant et ne pas être uniquement numérique."
-        ),
+        help_text=PASSWORD_HELP_TEXT,
     )
 
     password2 = forms.CharField(
@@ -82,6 +90,7 @@ class ProfileForm(FormMixin, forms.ModelForm):
         label="Nouveau mot de passe",
         required=False,
         widget=forms.PasswordInput,
+        help_text=PASSWORD_HELP_TEXT,
     )
 
     class Meta:
@@ -146,4 +155,12 @@ class CrispyAuthenticationForm(AuthenticationForm):
 
 
 class ProfilePasswordForm(PasswordChangeForm):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].help_text = PASSWORD_HELP_TEXT
+
+
+class SetPasswordFormFr(SetPasswordForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["new_password1"].help_text = PASSWORD_HELP_TEXT
