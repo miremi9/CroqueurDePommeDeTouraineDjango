@@ -68,6 +68,46 @@
         bootstrap.Toast.getOrCreateInstance(el).show();
     });
 });
+
+function initPasswordToggles(root) {
+    (root || document).querySelectorAll('input[type="password"]:not([data-toggle-initialized])').forEach(function (input) {
+        input.setAttribute('data-toggle-initialized', 'true');
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'input-group';
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+        input.classList.add('border-end-0');
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-outline-secondary';
+        button.setAttribute('aria-label', 'Afficher le mot de passe');
+        button.innerHTML = '<i class="bi bi-eye"></i>';
+
+        button.addEventListener('click', function () {
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            button.innerHTML = showing
+                ? '<i class="bi bi-eye"></i>'
+                : '<i class="bi bi-eye-slash"></i>';
+            button.setAttribute(
+                'aria-label',
+                showing ? 'Afficher le mot de passe' : 'Masquer le mot de passe'
+            );
+        });
+
+        wrapper.appendChild(button);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    initPasswordToggles();
+});
+
+document.body.addEventListener('htmx:afterSettle', function (event) {
+    initPasswordToggles(event.target);
+});
     </script>
 {% include "forum/login_modal.html" %}
 
