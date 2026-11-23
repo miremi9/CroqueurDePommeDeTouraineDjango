@@ -1,8 +1,11 @@
+import datetime
+
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.shortcuts import render
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import TemplateView
 
 import tools
@@ -27,15 +30,33 @@ def edit_sections(request):
     return render(request, 'administration/edit_sections.html')
 
 
-def daily_counts(queryset, date_field):
-    """Agrège un queryset par jour sur date_field, sans passer par une table intermédiaire."""
-    return list(
-        queryset
-        .annotate(day=TruncDate(date_field))
-        .values("day")
-        .annotate(valeur=Count("id"))
-        .order_by("day")
-    )
+DASHBOARD_DAYS = 15
+
+
+def daily_counts(queryset, date_field, days=DASHBOARD_DAYS):
+    """Agrège un queryset par jour sur date_field, sans passer par une table intermédiaire,
+    et complète les jours sans donnée à 0 sur les `days` derniers jours."""
+    today = timezone.localdate()
+    start = today - datetime.timedelta(days=days - 1)
+
+    counts = {
+        row["day"]: row["valeur"]
+        for row in (
+            queryset
+            .filter(**{f"{date_field}__date__gte": start})
+            .annotate(day=TruncDate(date_field))
+            .values("day")
+            .annotate(valeur=Count("id"))
+        )
+    }
+
+    return [
+        {
+            "date": (day := start + datetime.timedelta(days=i)).isoformat(),
+            "valeur": counts.get(day, 0),
+        }
+        for i in range(days)
+    ]
 
 
 class DashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
@@ -58,12 +79,9 @@ class DashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
                 "id": chart_id,
                 "label": label,
                 "color": CHART_COLORS[chart_id],
-                "data": [
-                    {"date": row["day"].isoformat(), "valeur": row["valeur"]}
-                    for row in rows
-                ],
+                "data": data,
             }
-            for chart_id, label, rows in charts_source
+            for chart_id, label, data in charts_source
         ]
         return context
 
