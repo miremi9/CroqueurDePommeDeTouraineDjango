@@ -15,3 +15,11 @@ class SiteBody(SingletonModel):
 
     def __str__(self):
         return self.title
+
+
+class VisitorLog(models.Model):
+    session_key = models.CharField(max_length=40, unique=True)
+    first_seen = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.session_key} - {self.first_seen}"

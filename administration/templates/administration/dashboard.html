@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<div class="py-5">
+    <div class="container">
+
+        <h2 class="mb-4">Tableau de bord</h2>
+
+        {{ charts|json_script:"charts-data" }}
+
+        <div class="row g-4">
+            {% for chart in charts %}
+            <div class="col-12 col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body p-4">
+
+                        <h3 class="h6 card-title mb-3">{{ chart.label }}</h3>
+
+                        <canvas id="chart-{{ chart.id }}" height="220"></canvas>
+
+                        <details class="mt-3">
+                            <summary class="text-muted small">Voir les données</summary>
+                            <table class="table table-sm mt-2">
+                                <thead>
+                                <tr>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Valeur</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for point in chart.data %}
+                                <tr>
+                                    <td>{{ point.date }}</td>
+                                    <td>{{ point.valeur }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </details>
+
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="{% static 'administration/js/dashboard.js' %}"></script>
+
+{% endblock %}
