@@ -5,6 +5,7 @@ from .views import SiteBodyUpdateView
 
 app_name = "administration"
 urlpatterns = [
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('sections/', views.SectionAdminListView.as_view(), name='sections'),
     path('sections/?<int:pk>/', views.SectionEditView.as_view(), name='section_detail'),
     path('sections/create/', views.SectionEditView.as_view(), name='section_create'),
